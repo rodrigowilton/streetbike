@@ -558,6 +558,34 @@
     .scroll-content::-webkit-scrollbar { display: none; }
 
 
+
+    /* ===== HOME EVENTS STRIP ===== */
+    .home-events-section { padding: 0 16px 8px; }
+    .home-section-title {
+      font-family: var(--font-display); font-size: 18px; font-weight: 700;
+      margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .home-section-title span { color: var(--orange); }
+    .home-section-link { font-size: 13px; color: var(--orange); font-weight: 600; cursor: pointer; }
+    .home-events-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+    .home-events-scroll::-webkit-scrollbar { display: none; }
+    .home-event-card {
+      background: var(--card); border-radius: 14px; min-width: 190px; max-width: 190px;
+      border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;
+      cursor: pointer; transition: transform .2s;
+    }
+    .home-event-card:active { transform: scale(.97); }
+    .home-event-top {
+      background: var(--orange); padding: 7px 12px;
+      font-family: var(--font-display); font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px; color: white;
+    }
+    .home-event-body { padding: 10px 12px; }
+    .home-event-name { font-weight: 700; font-size: 14px; margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .home-event-info { font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 5px; }
+    .home-events-empty { color: var(--gray); font-size: 13px; padding: 8px 0; }
+
     /* ===== DELETE BUTTON ===== */
     .btn-delete {
       background: transparent; color: #555; border: none;
@@ -806,6 +834,15 @@
         <div class="feed-header">
           <div class="welcome-text">Olá, <span id="welcomeName">ciclista</span> 👋</div>
           <div class="feed-subtitle">Veja o que está acontecendo na comunidade</div>
+        </div>
+        <div class="home-events-section">
+          <div class="home-section-title">
+            📅 Eventos de <span id="currentMonthName">—</span>
+            <span class="home-section-link" onclick="switchTab('events')">Ver todos →</span>
+          </div>
+          <div class="home-events-scroll" id="homeEventsList">
+            <div class="loading"><div class="loading-spinner"></div></div>
+          </div>
         </div>
         <div id="feedList">
           <div class="loading"><div class="loading-spinner"></div></div>
@@ -1517,6 +1554,7 @@ window.doLogout = async function() {
 function initMainApp() {
   loadProfile();
   loadFeed();
+  loadHomeEvents();
   checkExpiryBanner();
 }
 
@@ -2054,6 +2092,56 @@ window.submitBroadcast = async function() {
     document.getElementById('broadcastMsg').value = '';
     showToast('✅ Broadcast enviado para todos!');
   } catch(e) { showToast('Erro ao enviar broadcast'); }
+}
+
+
+// ===== HOME EVENTS =====
+async function loadHomeEvents() {
+  const now = new Date();
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const el = document.getElementById('currentMonthName');
+  if (el) el.textContent = months[now.getMonth()];
+
+  const list = document.getElementById('homeEventsList');
+  if (!list) return;
+
+  try {
+    const events = await getEvents();
+    const thisMonth = events.filter(e => {
+      const d = e.eventDate?.toDate?.();
+      return d && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+
+    if (!thisMonth.length) {
+      list.innerHTML = `<div class="home-events-empty">Nenhum evento este mês. <span style="color:var(--orange);cursor:pointer;" onclick="switchTab('events')">Criar evento →</span></div>`;
+      return;
+    }
+
+    list.innerHTML = thisMonth.map(e => {
+      const date = e.eventDate?.toDate?.();
+      const dateStr = date ? date.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', weekday:'short' }) : '';
+      const joined = e.participants?.includes(currentUser?.uid);
+      return `
+        <div class="home-event-card" onclick="switchTab('events')">
+          <div class="home-event-top">
+            <i class="fa-solid fa-calendar-check"></i> ${dateStr}
+          </div>
+          <div class="home-event-body">
+            <div class="home-event-name">${e.title}</div>
+            <div class="home-event-info">
+              <i class="fa-solid fa-user-group" style="color:var(--orange)"></i>
+              ${e.participants?.length || 0} participantes
+            </div>
+            <div class="home-event-info" style="margin-top:4px;">
+              ${joined ? '<span style="color:var(--green);font-weight:700;">✓ Inscrito</span>' : `<span style="color:var(--orange);">Participar →</span>`}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    if (list) list.innerHTML = '';
+  }
 }
 
 // ===== CHAT =====

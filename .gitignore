@@ -1,2 +1,33 @@
-# Garantir que node_modules seja ignorado
+# Node.js - OBRIGATÓRIO
 node_modules/
+package-lock.json
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Capacitor/Cordova (pastas nativas - descomente se NÃO for versionar o app nativo)
+# android/
+# ios/
+www/
+
+# Arquivos sensíveis
+.env
+.env.local
+*.config.json
+capacitor.config.json
+google-services.json
+GoogleService-Info.plist
+
+# Logs e builds
+*.log
+*.tmp
+dist/
+build/
