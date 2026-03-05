@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0D0D0D" />
+  <title>StreetBike</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B00;
+      --orange-dark: #CC5500;
+      --orange-glow: #FF6B0033;
+      --black: #0D0D0D;
+      --dark: #141414;
+      --card: #1C1C1C;
+      --card2: #242424;
+      --border: #2E2E2E;
+      --white: #FFFFFF;
+      --gray: #888;
+      --light-gray: #BBB;
+      --green: #22C55E;
+      --yellow: #EAB308;
+      --red: #EF4444;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body: 'Barlow', sans-serif;
+    }
+    html, body {
+      height: 100%; background: var(--black); color: var(--white);
+      font-family: var(--font-body); overflow: hidden;
+    }
+    button { cursor: pointer; border: none; outline: none; font-family: var(--font-body); }
+    input, textarea, select { font-family: var(--font-body); outline: none; border: none; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== APP SHELL ===== */
+    #app { height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+    /* ===== SCREENS ===== */
+    .screen { 
+      display: none; flex-direction: column; height: 100%; 
+      padding-top: var(--safe-top);
+    }
+    .screen.active { display: flex; }
+
+    /* ===== SPLASH ===== */
+    #splash {
+      background: var(--black); align-items: center; justify-content: center;
+      gap: 20px; position: relative; overflow: hidden;
+    }
+    #splash::before {
+      content: ''; position: absolute; width: 400px; height: 400px;
+      background: radial-gradient(circle, var(--orange-glow) 0%, transparent 70%);
+      border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.2);opacity:1} }
+    .splash-logo { font-family: var(--font-display); font-size: 56px; font-weight: 800;
+      letter-spacing: 4px; color: var(--orange); z-index: 1;
+      animation: slideUp .8s ease forwards; opacity: 0; transform: translateY(30px); }
+    @keyframes slideUp { to { opacity:1; transform:translateY(0); } }
+    .splash-tagline { color: var(--gray); font-size: 15px; letter-spacing: 1px; z-index: 1;
+      animation: slideUp .8s .2s ease forwards; opacity: 0; transform: translateY(30px); }
+    .splash-spinner { width: 36px; height: 36px; border: 3px solid var(--border);
+      border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== AUTH SCREENS ===== */
+    #login, #register {
+      background: var(--black); overflow-y: auto; padding-bottom: 40px;
+    }
+    .auth-header {
+      background: linear-gradient(135deg, #0D0D0D 0%, #1a0a00 50%, #FF6B0022 100%);
+      padding: 60px 28px 40px; position: relative; overflow: hidden;
+    }
+    .auth-header::after {
+      content: ''; position: absolute; bottom: -40px; right: -40px;
+      width: 180px; height: 180px; border: 3px solid var(--orange-glow);
+      border-radius: 50%;
+    }
+    .auth-logo { font-family: var(--font-display); font-size: 44px; font-weight: 800;
+      color: var(--orange); letter-spacing: 3px; }
+    .auth-subtitle { color: var(--gray); margin-top: 6px; font-size: 14px; }
+    .auth-form { padding: 32px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--gray); letter-spacing: .5px; text-transform: uppercase; }
+    .form-input {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; color: var(--white); font-size: 15px; width: 100%;
+      transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--orange); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-select {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; color: var(--white); font-size: 15px; width: 100%;
+      appearance: none;
+    }
+    .btn-primary {
+      background: var(--orange); color: var(--white); border-radius: 14px;
+      padding: 16px; font-size: 16px; font-weight: 700; font-family: var(--font-display);
+      letter-spacing: 1px; text-transform: uppercase; width: 100%;
+      transition: background .2s, transform .1s; margin-top: 8px;
+    }
+    .btn-primary:active { transform: scale(.98); background: var(--orange-dark); }
+    .btn-outline {
+      background: transparent; color: var(--orange); border: 1.5px solid var(--orange);
+      border-radius: 14px; padding: 14px; font-size: 15px; font-weight: 600; width: 100%;
+      transition: all .2s;
+    }
+    .btn-outline:active { background: var(--orange-glow); }
+    .auth-link { text-align: center; color: var(--gray); font-size: 14px; }
+    .auth-link span { color: var(--orange); font-weight: 600; cursor: pointer; }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; }
+    .checkbox-row input[type=checkbox] { accent-color: var(--orange); width: 18px; height: 18px; }
+    .checkbox-row label { font-size: 13px; color: var(--gray); }
+    .info-banner {
+      margin: 0 24px; padding: 12px 16px; background: #1a0e00;
+      border: 1px solid var(--orange); border-radius: 10px; color: #FFA040;
+      font-size: 13px; text-align: center;
+    }
+
+    /* ===== MAIN APP ===== */
+    #main { background: var(--black); }
+    .main-content {
+      flex: 1; overflow-y: auto; padding-bottom: 80px;
+      scroll-behavior: smooth;
+    }
+    .main-content::-webkit-scrollbar { display: none; }
+
+    /* ===== TOP BAR ===== */
+    .top-bar {
+      background: var(--black); padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+      padding-top: calc(16px + var(--safe-top));
+    }
+    .top-bar-logo { font-family: var(--font-display); font-size: 26px; font-weight: 800;
+      color: var(--orange); letter-spacing: 2px; }
+    .top-bar-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 10px; background: var(--card);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--white); font-size: 16px; border: 1px solid var(--border);
+      transition: all .2s; cursor: pointer;
+    }
+    .icon-btn:active { background: var(--card2); }
+    .notif-badge { position: relative; }
+    .notif-badge::after {
+      content: ''; position: absolute; top: 6px; right: 6px;
+      width: 8px; height: 8px; background: var(--red); border-radius: 50%;
+      border: 2px solid var(--black);
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      display: flex; background: var(--dark); border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom); flex-shrink: 0;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 10px 4px 8px; gap: 4px; cursor: pointer; transition: all .2s;
+      color: var(--gray); font-size: 10px; font-weight: 600; letter-spacing: .3px;
+      text-transform: uppercase; border: none; background: none;
+    }
+    .nav-item i { font-size: 20px; transition: transform .2s; }
+    .nav-item.active { color: var(--orange); }
+    .nav-item.active i { transform: scale(1.1); }
+    .nav-item.nav-center { position: relative; }
+    .nav-center-btn {
+      width: 52px; height: 52px; border-radius: 16px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: white; margin-top: -20px;
+      box-shadow: 0 4px 20px var(--orange-glow); transition: transform .2s;
+    }
+    .nav-item.nav-center:active .nav-center-btn { transform: scale(.92); }
+
+    /* ===== TAB PAGES ===== */
+    .tab-page { display: none; flex-direction: column; height: 100%; }
+    .tab-page.active { display: flex; }
+
+    /* ===== EXPIRY BANNER ===== */
+    .expiry-banner {
+      background: linear-gradient(90deg, #1a0e00, #2a1500);
+      border-bottom: 1px solid var(--orange); padding: 8px 16px;
+      display: flex; align-items: center; gap: 8px; font-size: 13px; color: #FFA040;
+    }
+
+    /* ===== FEED ===== */
+    .feed-header { padding: 20px 20px 8px; }
+    .welcome-text { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+    .welcome-text span { color: var(--orange); }
+    .feed-subtitle { color: var(--gray); font-size: 14px; margin-top: 2px; }
+
+    /* ===== CARDS ===== */
+    .post-card {
+      background: var(--card); border-radius: 16px; overflow: hidden;
+      margin: 0 16px 12px; border: 1px solid var(--border);
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+    .post-header { padding: 14px 16px 10px; display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 700; font-size: 16px; flex-shrink: 0;
+      object-fit: cover;
+    }
+    .post-author { font-weight: 600; font-size: 15px; }
+    .post-meta { color: var(--gray); font-size: 12px; }
+    .post-category {
+      margin-left: auto; background: var(--orange-glow); color: var(--orange);
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1px solid var(--orange);
+    }
+    .post-content { padding: 0 16px 14px; font-size: 15px; line-height: 1.5; color: #DDD; }
+    .post-actions {
+      padding: 10px 16px 14px; display: flex; gap: 16px; border-top: 1px solid var(--border);
+    }
+    .action-btn {
+      display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--gray);
+      background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 8px;
+      transition: all .2s;
+    }
+    .action-btn:active { background: var(--card2); }
+    .action-btn.liked { color: var(--red); }
+    .action-btn i { font-size: 16px; }
+
+    /* ===== ROUTES ===== */
+    .section-header {
+      padding: 20px 20px 12px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+    .btn-add {
+      background: var(--orange); color: white; border-radius: 10px;
+      padding: 8px 14px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+    }
+    .filter-chips { display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto; }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      background: var(--card); border: 1.5px solid var(--border); color: var(--gray);
+      cursor: pointer; white-space: nowrap; transition: all .2s;
+    }
+    .chip.active { background: var(--orange-glow); border-color: var(--orange); color: var(--orange); }
+
+    .route-card {
+      background: var(--card); border-radius: 16px; margin: 0 16px 12px;
+      border: 1px solid var(--border); overflow: hidden; cursor: pointer;
+      transition: transform .2s; animation: fadeIn .3s ease;
+    }
+    .route-card:active { transform: scale(.98); }
+    .route-card-header { 
+      padding: 16px; display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .route-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .route-creator { color: var(--gray); font-size: 13px; margin-top: 2px; }
+    .difficulty-badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+      font-family: var(--font-display); letter-spacing: .5px;
+    }
+    .diff-easy { background: #0f2a0f; color: var(--green); border: 1px solid var(--green); }
+    .diff-medium { background: #2a1f0f; color: var(--yellow); border: 1px solid var(--yellow); }
+    .diff-hard { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
+    .diff-extreme { background: #1a0a2a; color: #A855F7; border: 1px solid #A855F7; }
+    .route-stats { display: flex; gap: 20px; padding: 0 16px 16px; }
+    .route-stat { display: flex; align-items: center; gap: 6px; color: var(--gray); font-size: 13px; }
+    .route-stat i { color: var(--orange); font-size: 14px; }
+
+    /* ===== EVENTS ===== */
+    .event-card {
+      background: var(--card); border-radius: 16px; margin: 0 16px 12px;
+      border: 1px solid var(--border); overflow: hidden; cursor: pointer;
+      animation: fadeIn .3s ease;
+    }
+    .event-date-strip {
+      background: var(--orange); padding: 8px 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .event-date-strip i { font-size: 14px; }
+    .event-date-text { font-weight: 700; font-size: 14px; font-family: var(--font-display); letter-spacing: .5px; }
+    .event-body { padding: 14px 16px; }
+    .event-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .event-info { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .event-row { display: flex; align-items: center; gap: 8px; color: var(--gray); font-size: 14px; }
+    .event-row i { color: var(--orange); width: 16px; }
+    .event-footer { padding: 12px 16px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; }
+    .participants-text { color: var(--gray); font-size: 13px; }
+    .btn-join {
+      background: var(--orange); color: white; border-radius: 10px;
+      padding: 8px 20px; font-size: 14px; font-weight: 700; font-family: var(--font-display);
+    }
+    .btn-joined { background: var(--green); }
+    .event-category-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; background: var(--orange-glow);
+      color: var(--orange); border: 1px solid var(--orange); margin-top: 6px;
+    }
+
+    /* ===== PROFILE ===== */
+    .profile-header {
+      background: linear-gradient(180deg, #1a0a00 0%, var(--black) 100%);
+      padding: 28px 20px 20px; position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: -30px; right: -30px; width: 160px; height: 160px;
+      border: 2px solid var(--orange-glow); border-radius: 50%;
+    }
+    .profile-avatar-wrap { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 12px; }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 20px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 32px; font-weight: 700;
+      border: 3px solid var(--orange); flex-shrink: 0;
+    }
+    .profile-name { font-family: var(--font-display); font-size: 26px; font-weight: 800; }
+    .profile-bike { color: var(--orange); font-size: 14px; font-weight: 600; margin-top: 2px; }
+    .profile-city { color: var(--gray); font-size: 13px; }
+    .profile-stats { display: flex; gap: 0; margin-top: 16px; }
+    .profile-stat {
+      flex: 1; text-align: center; padding: 12px 8px;
+      border-right: 1px solid var(--border);
+    }
+    .profile-stat:last-child { border-right: none; }
+    .stat-value { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--orange); }
+    .stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; }
+
+    .expiry-card {
+      margin: 16px; background: var(--card); border-radius: 14px;
+      padding: 14px 16px; border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .expiry-icon { font-size: 28px; }
+    .expiry-label { font-size: 12px; color: var(--gray); text-transform: uppercase; }
+    .expiry-value { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .expiry-green { color: var(--green); }
+    .expiry-yellow { color: var(--yellow); }
+    .expiry-red { color: var(--red); }
+
+    .menu-list { margin: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+    .menu-item {
+      background: var(--card); border-radius: 14px; padding: 16px;
+      display: flex; align-items: center; gap: 14px; cursor: pointer;
+      border: 1px solid var(--border); transition: all .2s;
+    }
+    .menu-item:active { background: var(--card2); }
+    .menu-icon {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--orange-glow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--orange);
+    }
+    .menu-text { flex: 1; }
+    .menu-title { font-weight: 600; font-size: 15px; }
+    .menu-sub { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .menu-arrow { color: var(--gray); font-size: 14px; }
+    .logout-item { border-color: #2a0f0f; }
+    .logout-item .menu-icon { background: #2a0f0f; color: var(--red); }
+    .logout-item .menu-title { color: var(--red); }
+
+    /* ===== ADMIN ===== */
+    #admin { background: var(--black); overflow-y: auto; }
+    .admin-header {
+      background: var(--dark); padding: 20px; border-bottom: 1px solid var(--border);
+      padding-top: calc(20px + var(--safe-top));
+    }
+    .admin-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .admin-title { font-family: var(--font-display); font-size: 28px; font-weight: 800; }
+    .admin-title span { color: var(--orange); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card {
+      background: var(--card); border-radius: 14px; padding: 14px;
+      border: 1px solid var(--border); text-align: center;
+    }
+    .stat-card-value { font-family: var(--font-display); font-size: 32px; font-weight: 800; }
+    .stat-card-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+    .stat-total { color: var(--white); }
+    .stat-active-val { color: var(--green); }
+    .stat-expiring-val { color: var(--yellow); }
+    .stat-expired-val { color: var(--red); }
+
+    .admin-search {
+      padding: 12px 20px; background: var(--dark); border-bottom: 1px solid var(--border);
+    }
+    .search-input {
+      width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px; color: var(--white); font-size: 14px;
+    }
+    .admin-tabs {
+      display: flex; background: var(--dark); border-bottom: 1px solid var(--border);
+      overflow-x: auto; flex-shrink: 0;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab {
+      padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--gray);
+      cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+      transition: all .2s; background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .admin-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+    .admin-list { padding: 12px 16px; }
+    .user-card {
+      background: var(--card); border-radius: 14px; padding: 14px;
+      margin-bottom: 10px; border: 1px solid var(--border);
+    }
+    .user-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .user-avatar {
+      width: 44px; height: 44px; border-radius: 12px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 18px; font-weight: 700; flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-email { color: var(--gray); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status-badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      font-family: var(--font-display); flex-shrink: 0;
+    }
+    .badge-active { background: #0f2a0f; color: var(--green); border: 1px solid var(--green); }
+    .badge-expiring { background: #2a1f0f; color: var(--yellow); border: 1px solid var(--yellow); }
+    .badge-expired { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
+    .badge-blocked { background: #1a1a1a; color: var(--gray); border: 1px solid var(--border); }
+    .user-details { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 12px; }
+    .user-detail { font-size: 12px; color: var(--gray); }
+    .user-detail span { color: var(--light-gray); }
+    .user-actions { display: flex; gap: 8px; }
+    .user-btn {
+      flex: 1; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 700;
+      font-family: var(--font-display); cursor: pointer; transition: all .2s;
+    }
+    .btn-renew { background: var(--orange); color: white; border: none; }
+    .btn-block { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .btn-unblock { background: transparent; color: var(--green); border: 1px solid var(--green); }
+    .btn-msg { background: var(--card2); color: var(--white); border: 1px solid var(--border); }
+    .broadcast-btn {
+      margin: 12px 16px; width: calc(100% - 32px); background: var(--orange);
+      color: white; border-radius: 12px; padding: 14px; font-size: 15px;
+      font-weight: 700; font-family: var(--font-display); letter-spacing: .5px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    /* ===== MAINTENANCE ===== */
+    .maintenance-summary {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+      padding: 16px; 
+    }
+    .maint-stat {
+      background: var(--card); border-radius: 12px; padding: 12px;
+      text-align: center; border: 1px solid var(--border);
+    }
+    .maint-stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 800; }
+    .maint-stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; }
+    .maint-card {
+      background: var(--card); border-radius: 14px; margin: 0 16px 10px;
+      padding: 14px; border: 1px solid var(--border);
+    }
+    .maint-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .maint-component { font-weight: 700; font-size: 15px; }
+    .maint-progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+    .maint-progress-bar { height: 100%; border-radius: 3px; transition: width .5s ease; }
+    .prog-ok { background: var(--green); }
+    .prog-warn { background: var(--yellow); }
+    .prog-danger { background: var(--red); }
+    .maint-next { font-size: 12px; color: var(--gray); }
+
+    /* ===== NOTIFICATIONS ===== */
+    .notif-page { overflow-y: auto; }
+    .notif-card {
+      background: var(--card); border-radius: 14px; margin: 0 16px 10px;
+      padding: 14px; border: 1px solid var(--border); cursor: pointer;
+      transition: all .2s;
+    }
+    .notif-card.unread { border-color: var(--orange); background: #1a0d00; }
+    .notif-title { font-weight: 700; font-size: 15px; }
+    .notif-msg { color: var(--gray); font-size: 14px; margin-top: 4px; line-height: 1.4; }
+    .notif-time { color: #555; font-size: 11px; margin-top: 6px; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85);
+      z-index: 100; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--dark); border-radius: 24px 24px 0 0; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: 20px;
+      padding-bottom: calc(20px + var(--safe-bottom));
+      animation: slideUp .3s ease;
+    }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 20px; }
+    .modal-title span { color: var(--orange); }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px; background: var(--card);
+      border: none; color: var(--white); width: 32px; height: 32px; border-radius: 8px;
+      font-size: 16px; cursor: pointer;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 20px; gap: 12px; color: var(--gray); text-align: center;
+    }
+    .empty-state i { font-size: 48px; color: var(--border); }
+    .empty-state h3 { font-family: var(--font-display); font-size: 22px; color: var(--light-gray); }
+    .empty-state p { font-size: 14px; line-height: 1.5; }
+
+    /* ===== LOADING ===== */
+    .loading {
+      display: flex; align-items: center; justify-content: center; padding: 40px;
+    }
+    .loading-spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: var(--card2); color: white; padding: 12px 20px; border-radius: 12px;
+      font-size: 14px; font-weight: 600; z-index: 200; pointer-events: none;
+      opacity: 0; transition: opacity .3s; border: 1px solid var(--border);
+      white-space: nowrap; max-width: 90%;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ===== MARKETPLACE ===== */
+    .listing-card {
+      background: var(--card); border-radius: 14px; margin: 0 16px 12px;
+      border: 1px solid var(--border); overflow: hidden; animation: fadeIn .3s ease;
+    }
+    .listing-body { padding: 14px; }
+    .listing-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .listing-price { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--orange); margin-top: 4px; }
+    .listing-info { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+    .listing-tag {
+      background: var(--card2); padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; color: var(--gray); border: 1px solid var(--border);
+    }
+    .listing-seller { 
+      padding: 10px 14px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .seller-name { font-size: 13px; color: var(--gray); }
+    .seller-name span { color: var(--white); font-weight: 600; }
+    .contact-btn {
+      background: #0a3d1a; color: #22C55E; border: 1px solid #22C55E;
+      padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ===== SCROLLABLE CONTENT ===== */
+    .scroll-content { flex: 1; overflow-y: auto; }
+    .scroll-content::-webkit-scrollbar { display: none; }
+
+    /* ===== CHAT ===== */
+    .chat-screen { background: var(--black); }
+    .chat-list { padding: 12px 16px; }
+    .chat-item {
+      background: var(--card); border-radius: 14px; padding: 14px;
+      margin-bottom: 10px; border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      transition: all .2s;
+    }
+    .chat-item:active { background: var(--card2); }
+    .chat-icon {
+      width: 48px; height: 48px; border-radius: 14px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .chat-icon.group { background: #1a0a2a; color: #A855F7; border: 1px solid #A855F7; }
+    .chat-name { font-weight: 700; font-size: 15px; }
+    .chat-preview { color: var(--gray); font-size: 13px; margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-time { color: #555; font-size: 11px; margin-left: auto; flex-shrink: 0; }
+    .chat-unread {
+      background: var(--orange); color: white; border-radius: 20px;
+      padding: 2px 7px; font-size: 11px; font-weight: 700; margin-left: auto;
+    }
+    /* ===== CONVERSATION ===== */
+    .conv-screen { background: var(--black); }
+    .conv-header {
+      background: var(--dark); padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+      padding-top: calc(14px + var(--safe-top));
+    }
+    .conv-avatar {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+    }
+    .conv-name { font-weight: 700; font-size: 16px; flex: 1; }
+    .conv-members { font-size: 12px; color: var(--gray); }
+    .conv-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .conv-messages::-webkit-scrollbar { display: none; }
+    .msg-bubble {
+      max-width: 75%; padding: 10px 14px; border-radius: 16px;
+      font-size: 14px; line-height: 1.4;
+    }
+    .msg-mine {
+      background: var(--orange); color: white;
+      border-bottom-right-radius: 4px; align-self: flex-end;
+    }
+    .msg-other {
+      background: var(--card2); color: var(--white);
+      border-bottom-left-radius: 4px; align-self: flex-start;
+    }
+    .msg-author { font-size: 11px; font-weight: 700; color: var(--orange); margin-bottom: 3px; }
+    .msg-time { font-size: 10px; opacity: .6; margin-top: 3px; text-align: right; }
+    .conv-input-bar {
+      padding: 12px 16px; background: var(--dark);
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center;
+      padding-bottom: calc(12px + var(--safe-bottom)); flex-shrink: 0;
+    }
+    .conv-input {
+      flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 12px 16px; color: var(--white); font-size: 14px;
+    }
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 12px; background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 18px; flex-shrink: 0;
+    }
+    /* ===== EXPIRED SCREEN ===== */
+    .expired-screen {
+      background: var(--black); align-items: center; justify-content: center;
+      padding: 32px 24px; text-align: center; gap: 16px;
+    }
+    .expired-icon { font-size: 64px; }
+    .expired-title { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--red); }
+    .expired-msg { color: var(--gray); font-size: 15px; line-height: 1.6; }
+    .pix-card {
+      background: var(--card); border: 1px solid var(--orange); border-radius: 16px;
+      padding: 20px; width: 100%; text-align: left;
+    }
+    .pix-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--orange); margin-bottom: 12px; }
+    .pix-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .pix-row i { color: var(--orange); width: 20px; }
+    .pix-key { font-weight: 600; font-size: 14px; word-break: break-all; }
+    .pix-sub { font-size: 12px; color: var(--gray); }
+    .btn-whatsapp {
+      background: #25D366; color: white; border-radius: 14px;
+      padding: 16px; font-size: 16px; font-weight: 700;
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-logout-exp {
+      background: transparent; color: var(--gray); font-size: 14px;
+      width: 100%; padding: 12px;
+    }
+    @media (max-width: 380px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .auth-logo { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SPLASH -->
+  <div id="splash" class="screen active">
+    <div class="splash-logo">STREETBIKE</div>
+    <div class="splash-tagline">Conectando ciclistas do Brasil</div>
+    <div class="splash-spinner"></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login" class="screen">
+    <div class="auth-header">
+      <div class="auth-logo">STREETBIKE</div>
+      <div class="auth-subtitle">🏍️ Conectando ciclistas do Brasil</div>
+    </div>
+    <div id="loginBanner" class="info-banner" style="display:none;margin-top:16px;"></div>
+    <div class="auth-form">
+      <h2 style="font-family:var(--font-display);font-size:26px;font-weight:800;">Bem-vindo de volta!</h2>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" id="loginPassword" class="form-input" placeholder="••••••" />
+      </div>
+      <p style="text-align:right;color:var(--orange);font-size:13px;cursor:pointer;" onclick="forgotPassword()">Esqueci minha senha</p>
+      <button class="btn-primary" onclick="doLogin()">ENTRAR</button>
+      <div class="auth-link">Não tem conta? <span onclick="showRegister()">Criar conta grátis</span></div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="register" class="screen">
+    <div class="auth-header">
+      <div class="auth-logo">STREETBIKE</div>
+      <div class="auth-subtitle">Crie sua conta — 30 dias grátis</div>
+    </div>
+    <div class="auth-form">
+      <h2 style="font-family:var(--font-display);font-size:26px;font-weight:800;">Criar Conta</h2>
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input type="text" id="regName" class="form-input" placeholder="Seu nome" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="email@..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp</label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="(11) 99999-9999" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input type="text" id="regCity" class="form-input" placeholder="Sua cidade" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="regState" class="form-select">
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option selected>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Modelo da Bike</label>
+          <input type="text" id="regBike" class="form-input" placeholder="Ex: Trek FX3" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ano</label>
+          <input type="text" id="regBikeYear" class="form-input" placeholder="2023" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estilo de Pedalada</label>
+        <select id="regStyle" class="form-select">
+          <option>Urbano</option><option>Trilha / Off-road</option>
+          <option>Longa Distância</option><option>Velocidade</option>
+          <option>Cicloturismo</option><option>MTB</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 chars" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar</label>
+          <input type="password" id="regConfirm" class="form-input" placeholder="Repita" />
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="regTerms" />
+        <label for="regTerms">Aceito os Termos de Uso e Política de Privacidade</label>
+      </div>
+      <button class="btn-primary" onclick="doRegister()">CRIAR CONTA GRÁTIS</button>
+      <div class="auth-link">Já tem conta? <span onclick="showLogin()">Entrar</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main" class="screen">
+    <div class="top-bar">
+      <div class="top-bar-logo">STREETBIKE</div>
+      <div class="top-bar-actions">
+        <div class="icon-btn notif-badge" id="notifBtn" onclick="openNotifications()">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiry Banner -->
+    <div id="expiryBanner" class="expiry-banner" style="display:none;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span id="expiryBannerText"></span>
+    </div>
+
+    <!-- Tab Pages -->
+    <div class="main-content" id="mainContent">
+
+      <!-- HOME / FEED -->
+      <div id="tab-home" class="tab-page active">
+        <div class="feed-header">
+          <div class="welcome-text">Olá, <span id="welcomeName">ciclista</span> 👋</div>
+          <div class="feed-subtitle">Veja o que está acontecendo na comunidade</div>
+        </div>
+        <div id="feedList">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- ROUTES -->
+      <div id="tab-routes" class="tab-page">
+        <div class="section-header">
+          <div class="section-title">Rotas</div>
+          <button class="btn-add" onclick="openModal('createRouteModal')"><i class="fa-solid fa-plus"></i> Nova</button>
+        </div>
+        <div class="filter-chips">
+          <div class="chip active" onclick="filterRoutes('',this)">Todas</div>
+          <div class="chip" onclick="filterRoutes('Fácil',this)">🟢 Fácil</div>
+          <div class="chip" onclick="filterRoutes('Moderado',this)">🟡 Moderado</div>
+          <div class="chip" onclick="filterRoutes('Difícil',this)">🔴 Difícil</div>
+          <div class="chip" onclick="filterRoutes('Extremo',this)">🟣 Extremo</div>
+        </div>
+        <div id="routesList">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- EVENTS -->
+      <div id="tab-events" class="tab-page">
+        <div class="section-header">
+          <div class="section-title">Eventos</div>
+          <button class="btn-add" onclick="openModal('createEventModal')"><i class="fa-solid fa-plus"></i> Criar</button>
+        </div>
+        <div id="eventsList">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="tab-profile" class="tab-page scroll-content">
+        <div class="profile-header">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profileAvatar">SB</div>
+            <div>
+              <div class="profile-name" id="profileName">Carregando...</div>
+              <div class="profile-bike" id="profileBike"></div>
+              <div class="profile-city" id="profileCity"></div>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="stat-value" id="profileKm">0</div>
+              <div class="stat-label">km</div>
+            </div>
+            <div class="profile-stat">
+              <div class="stat-value" id="profileRoutes">0</div>
+              <div class="stat-label">Rotas</div>
+            </div>
+            <div class="profile-stat">
+              <div class="stat-value" id="profileStyle">—</div>
+              <div class="stat-label">Estilo</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expiry-card">
+          <div class="expiry-icon">⏰</div>
+          <div>
+            <div class="expiry-label">Vencimento do acesso</div>
+            <div class="expiry-value" id="profileExpiry">—</div>
+          </div>
+        </div>
+
+        <div class="menu-list">
+          <div class="menu-item" onclick="openModal('maintenanceModal')">
+            <div class="menu-icon"><i class="fa-solid fa-wrench"></i></div>
+            <div class="menu-text">
+              <div class="menu-title">Manutenção da Bike</div>
+              <div class="menu-sub">Controle de revisões e peças</div>
+            </div>
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-item" onclick="switchTab('marketplace')">
+            <div class="menu-icon"><i class="fa-solid fa-tag"></i></div>
+            <div class="menu-text">
+              <div class="menu-title">Classificados</div>
+              <div class="menu-sub">Compre e venda equipamentos</div>
+            </div>
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-item" onclick="openModal('createPostModal')">
+            <div class="menu-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div class="menu-text">
+              <div class="menu-title">Nova Publicação</div>
+              <div class="menu-sub">Compartilhe com a comunidade</div>
+            </div>
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-item" onclick="openNotifications()">
+            <div class="menu-icon"><i class="fa-solid fa-bell"></i></div>
+            <div class="menu-text">
+              <div class="menu-title">Notificações</div>
+              <div class="menu-sub">Mensagens e alertas</div>
+            </div>
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-item logout-item" onclick="doLogout()">
+            <div class="menu-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+            <div class="menu-text">
+              <div class="menu-title">Sair</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div id="tab-marketplace" class="tab-page">
+        <div class="section-header">
+          <div class="section-title">Classificados</div>
+          <button class="btn-add" onclick="openModal('createListingModal')"><i class="fa-solid fa-plus"></i> Anunciar</button>
+        </div>
+        <div class="filter-chips">
+          <div class="chip active">Todos</div>
+          <div class="chip">Peças</div>
+          <div class="chip">Acessórios</div>
+          <div class="chip">Bikes</div>
+          <div class="chip">Equipamentos</div>
+        </div>
+        <div id="marketplaceList">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- CHAT TAB -->
+      <div id="tab-chat" class="tab-page">
+        <div class="section-header">
+          <div class="section-title">Chat</div>
+          <button class="btn-add" onclick="openModal('createGroupModal')"><i class="fa-solid fa-plus"></i> Grupo</button>
+        </div>
+        <div id="chatList" class="chat-list">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+    </div><!-- end main-content -->
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
+        <i class="fa-solid fa-house"></i>
+        <span>Início</span>
+      </button>
+      <button class="nav-item" id="nav-routes" onclick="switchTab('routes')">
+        <i class="fa-solid fa-person-biking"></i>
+        <span>Rotas</span>
+      </button>
+      <button class="nav-item" id="nav-chat" onclick="switchTab('chat')">
+        <i class="fa-solid fa-comments"></i>
+        <span>Chat</span>
+      </button>
+      <button class="nav-item" id="nav-events" onclick="switchTab('events')">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Eventos</span>
+      </button>
+      <button class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+        <i class="fa-solid fa-user"></i>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- EXPIRED SCREEN -->
+  <div id="expired" class="screen expired-screen">
+    <div class="expired-icon">⏰</div>
+    <div class="expired-title">Acesso Expirado</div>
+    <div class="expired-msg">Seu período de acesso chegou ao fim.<br>Para continuar usando o StreetBike, faça um PIX e envie o comprovante.</div>
+    <div class="pix-card">
+      <div class="pix-title">💰 Como Renovar</div>
+      <div class="pix-row">
+        <i class="fa-solid fa-key"></i>
+        <div>
+          <div class="pix-sub">Chave PIX</div>
+          <div class="pix-key">rodrigowiltonalmeida@gmail.com</div>
+        </div>
+      </div>
+      <div class="pix-row">
+        <i class="fa-brands fa-whatsapp"></i>
+        <div>
+          <div class="pix-sub">Envie o comprovante e fale com o suporte</div>
+          <div class="pix-key">(27) 99273-4399</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-whatsapp" onclick="openWhatsAppSupport()">
+      <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
+    </button>
+    <button class="btn-logout-exp" onclick="doLogout()">Sair da conta</button>
+  </div>
+
+  <!-- CONVERSATION SCREEN -->
+  <div id="conversation" class="screen conv-screen">
+    <div class="conv-header">
+      <button class="icon-btn" onclick="showScreen('main');switchTab('chat')"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="conv-avatar" id="convAvatar">💬</div>
+      <div style="flex:1;min-width:0;">
+        <div class="conv-name" id="convName">Chat</div>
+        <div class="conv-members" id="convMembers"></div>
+      </div>
+      <button class="icon-btn" id="convMenuBtn" style="display:none;" onclick="openModal('groupInfoModal')">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+    </div>
+    <div id="convMessages" class="conv-messages">
+      <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+    <div class="conv-input-bar">
+      <input type="text" id="convInput" class="conv-input" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()" />
+      <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="screen">
+    <div class="admin-header">
+      <div class="admin-title-row">
+        <div class="admin-title">Admin <span>Panel</span></div>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-value stat-total" id="statTotal">0</div><div class="stat-card-label">Total</div></div>
+        <div class="stat-card"><div class="stat-card-value stat-active-val" id="statActive">0</div><div class="stat-card-label">Ativos</div></div>
+        <div class="stat-card"><div class="stat-card-value stat-expiring-val" id="statExpiring">0</div><div class="stat-card-label">Expirando</div></div>
+        <div class="stat-card"><div class="stat-card-value stat-expired-val" id="statExpired">0</div><div class="stat-card-label">Expirados</div></div>
+      </div>
+    </div>
+    <button class="broadcast-btn" onclick="openModal('broadcastModal')">
+      <i class="fa-solid fa-bullhorn"></i> Mensagem para Todos
+    </button>
+    <div class="admin-search">
+      <input type="text" class="search-input" placeholder="🔍 Buscar usuário..." id="adminSearch" oninput="filterAdminUsers()" />
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="setAdminTab('all',this)">Todos</button>
+      <button class="admin-tab" onclick="setAdminTab('active',this)">Ativos</button>
+      <button class="admin-tab" onclick="setAdminTab('expiring',this)">Expirando</button>
+      <button class="admin-tab" onclick="setAdminTab('expired',this)">Expirados</button>
+    </div>
+    <div id="adminList" class="admin-list" style="overflow-y:auto;flex:1;">
+      <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS PAGE -->
+  <div id="notifications" class="screen notif-page">
+    <div class="top-bar">
+      <button class="icon-btn" onclick="showScreen('main')"><i class="fa-solid fa-arrow-left"></i></button>
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:700;">Notificações</div>
+      <div style="width:40px;"></div>
+    </div>
+    <div id="notifList" style="padding:12px 16px;overflow-y:auto;flex:1;">
+      <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== MODALS ===== -->
+
+  <!-- Create Post Modal -->
+  <div id="createPostModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Nova <span>Publicação</span></div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select id="postCategory" class="form-select">
+            <option>Geral</option><option>Dica</option><option>Manutenção</option>
+            <option>Rota</option><option>Evento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conteúdo</label>
+          <textarea id="postContent" class="form-input" rows="4" placeholder="Compartilhe algo com a comunidade..." style="resize:none;"></textarea>
+        </div>
+        <button class="btn-primary" onclick="submitPost()">PUBLICAR</button>
+        <button class="btn-outline" onclick="closeModal('createPostModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Route Modal -->
+  <div id="createRouteModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Nova <span>Rota</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Título</label>
+          <input type="text" id="routeTitle" class="form-input" placeholder="Nome da rota" /></div>
+        <div class="form-group"><label class="form-label">Descrição</label>
+          <textarea id="routeDesc" class="form-input" rows="3" placeholder="Descreva a rota..." style="resize:none;"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Dificuldade</label>
+            <select id="routeDiff" class="form-select">
+              <option>Fácil</option><option>Moderado</option><option>Difícil</option><option>Extremo</option>
+            </select></div>
+          <div class="form-group"><label class="form-label">Terreno</label>
+            <select id="routeTerrain" class="form-select">
+              <option>Asfalto</option><option>Terra</option><option>Misto</option>
+            </select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Distância (km)</label>
+            <input type="number" id="routeKm" class="form-input" placeholder="0" /></div>
+          <div class="form-group"><label class="form-label">Tempo (min)</label>
+            <input type="number" id="routeTime" class="form-input" placeholder="0" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Cidade</label>
+          <input type="text" id="routeCity" class="form-input" placeholder="Cidade de início" /></div>
+        <button class="btn-primary" onclick="submitRoute()">CADASTRAR ROTA</button>
+        <button class="btn-outline" onclick="closeModal('createRouteModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Event Modal -->
+  <div id="createEventModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Criar <span>Evento</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Título</label>
+          <input type="text" id="eventTitle" class="form-input" placeholder="Nome do evento" /></div>
+        <div class="form-group"><label class="form-label">Descrição</label>
+          <textarea id="eventDesc" class="form-input" rows="3" style="resize:none;" placeholder="Detalhes do evento..."></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Data</label>
+            <input type="datetime-local" id="eventDate" class="form-input" /></div>
+          <div class="form-group"><label class="form-label">Categoria</label>
+            <select id="eventCategory" class="form-select">
+              <option>Passeio</option><option>Competição</option><option>Treino</option>
+              <option>Social</option><option>Solidariedade</option>
+            </select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Local</label>
+          <input type="text" id="eventLocation" class="form-input" placeholder="Ponto de encontro" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Vagas (0=ilimitado)</label>
+            <input type="number" id="eventSpots" class="form-input" placeholder="0" /></div>
+          <div class="form-group"><label class="form-label">Valor (0=grátis)</label>
+            <input type="number" id="eventPrice" class="form-input" placeholder="0.00" /></div>
+        </div>
+        <button class="btn-primary" onclick="submitEvent()">CRIAR EVENTO</button>
+        <button class="btn-outline" onclick="closeModal('createEventModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Broadcast Modal -->
+  <div id="broadcastModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📢 <span>Broadcast</span></div>
+      <p style="color:var(--gray);font-size:14px;margin-bottom:16px;">Enviar mensagem para TODOS os usuários</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Título</label>
+          <input type="text" id="broadcastTitle" class="form-input" placeholder="Título da mensagem" /></div>
+        <div class="form-group"><label class="form-label">Mensagem</label>
+          <textarea id="broadcastMsg" class="form-input" rows="4" style="resize:none;" placeholder="Digite sua mensagem..."></textarea></div>
+        <button class="btn-primary" onclick="submitBroadcast()">ENVIAR PARA TODOS</button>
+        <button class="btn-outline" onclick="closeModal('broadcastModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send Message Modal -->
+  <div id="sendMsgModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">💬 Enviar <span>Mensagem</span></div>
+      <p style="color:var(--orange);font-size:13px;margin-bottom:16px;" id="msgRecipient">Para: —</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Título</label>
+          <input type="text" id="msgTitle" class="form-input" placeholder="Título" /></div>
+        <div class="form-group"><label class="form-label">Mensagem</label>
+          <textarea id="msgContent" class="form-input" rows="4" style="resize:none;"></textarea></div>
+        <button class="btn-primary" onclick="submitUserMsg()">ENVIAR</button>
+        <button class="btn-outline" onclick="closeModal('sendMsgModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Renew Modal -->
+  <div id="renewModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">✅ Renovar <span>Acesso</span></div>
+      <p style="color:var(--gray);font-size:14px;margin-bottom:20px;" id="renewName">Usuário</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary" onclick="confirmRenew(30)">🕐 30 dias</button>
+        <button class="btn-primary" onclick="confirmRenew(60)">📅 60 dias</button>
+        <button class="btn-primary" onclick="confirmRenew(90)">📆 90 dias</button>
+        <button class="btn-primary" onclick="confirmRenew(180)">🗓️ 180 dias</button>
+        <button class="btn-primary" onclick="confirmRenew(365)">📅 1 ano</button>
+        <button class="btn-outline" onclick="closeModal('renewModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maintenance Modal -->
+  <div id="maintenanceModal" class="modal-overlay">
+    <div class="modal" style="position:relative;max-height:85vh;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🔧 <span>Manutenção</span></div>
+      <div id="maintContent" style="overflow-y:auto;max-height:60vh;">
+        <div class="loading"><div class="loading-spinner"></div></div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px;" onclick="openModal('addMaintModal')">+ Adicionar Item</button>
+      <button class="btn-outline" style="margin-top:8px;" onclick="closeModal('maintenanceModal')">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Add Maintenance Item Modal -->
+  <div id="addMaintModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Adicionar <span>Item</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Componente</label>
+          <select id="maintComponent" class="form-select">
+            <option>Óleo do Motor</option><option>Filtro de Óleo</option>
+            <option>Corrente/Relação</option><option>Pneu Dianteiro</option>
+            <option>Pneu Traseiro</option><option>Pastilha Freio Dianteira</option>
+            <option>Pastilha Freio Traseira</option><option>Vela de Ignição</option>
+            <option>Filtro de Ar</option><option>Fluido de Freio</option>
+            <option>Bateria</option><option>Revisão Geral</option>
+          </select></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Último KM</label>
+            <input type="number" id="maintLastKm" class="form-input" placeholder="0" /></div>
+          <div class="form-group"><label class="form-label">Intervalo (km)</label>
+            <input type="number" id="maintInterval" class="form-input" placeholder="3000" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Observações</label>
+          <input type="text" id="maintNotes" class="form-input" placeholder="Notas opcionais" /></div>
+        <button class="btn-primary" onclick="submitMaintItem()">SALVAR</button>
+        <button class="btn-outline" onclick="closeModal('addMaintModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Listing Modal -->
+  <div id="createListingModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📦 Novo <span>Anúncio</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Título</label>
+          <input type="text" id="listingTitle" class="form-input" placeholder="Ex: Bike Trek FX3 2022" /></div>
+        <div class="form-group"><label class="form-label">Descrição</label>
+          <textarea id="listingDesc" class="form-input" rows="3" style="resize:none;" placeholder="Detalhes do item..."></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Preço (R$)</label>
+            <input type="number" id="listingPrice" class="form-input" placeholder="0,00" /></div>
+          <div class="form-group"><label class="form-label">Categoria</label>
+            <select id="listingCategory" class="form-select">
+              <option>Peças</option><option>Acessórios</option><option>Equipamentos</option><option>Bike Completa</option>
+            </select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Condição</label>
+            <select id="listingCondition" class="form-select">
+              <option>Novo</option><option>Seminovo</option><option>Usado</option>
+            </select></div>
+          <div class="form-group"><label class="form-label">Cidade</label>
+            <input type="text" id="listingCity" class="form-input" placeholder="Cidade" /></div>
+        </div>
+        <button class="btn-primary" onclick="submitListing()">PUBLICAR ANÚNCIO</button>
+        <button class="btn-outline" onclick="closeModal('createListingModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div id="createGroupModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title">👥 Criar <span>Grupo</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group"><label class="form-label">Nome do grupo</label>
+          <input type="text" id="groupName" class="form-input" placeholder="Ex: Trilheiros ES" /></div>
+        <div class="form-group"><label class="form-label">Descrição</label>
+          <input type="text" id="groupDesc" class="form-input" placeholder="Sobre o grupo..." /></div>
+        <div class="form-group"><label class="form-label">Categoria</label>
+          <select id="groupCategory" class="form-select">
+            <option>Urbano</option><option>Trilha / Off-road</option>
+            <option>Longa Distância</option><option>MTB</option>
+            <option>Velocidade</option><option>Cicloturismo</option><option>Geral</option>
+          </select></div>
+        <button class="btn-primary" onclick="submitCreateGroup()">CRIAR GRUPO</button>
+        <button class="btn-outline" onclick="closeModal('createGroupModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group Info Modal -->
+  <div id="groupInfoModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="groupInfoTitle">Grupo</div>
+      <div id="groupInfoContent"></div>
+      <button class="btn-outline" style="margin-top:16px;color:var(--red);border-color:var(--red);" onclick="leaveGroup()">Sair do grupo</button>
+      <button class="btn-outline" style="margin-top:8px;" onclick="closeModal('groupInfoModal')">Fechar</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+</div>
+
+<script type="module">
+import {
+  auth, db,
+  registerUser, loginUser, logoutUser, resetPassword, getCurrentUser,
+  createPost, getPosts, toggleLike, addComment, getComments,
+  createRoute, getRoutes,
+  createEvent, getEvents, joinEvent,
+  getNotifications, markRead,
+  saveMaintenance, getMaintenance,
+  getMarketplace, createListing,
+  getAllUsers, renewAccess, toggleUserActive,
+  sendNotificationToUser, sendBroadcast, getAdminStats,
+  getChatRooms, createGroup, joinRoom, leaveRoom,
+  getChatMessages, sendChatMessage, ensureGlobalChat
+} from './services/firebase.js';
+
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+// ===== STATE =====
+let currentUser = null;
+let allAdminUsers = [];
+let currentAdminTab = 'all';
+let selectedUserForAction = null;
+let allRoutes = [];
+
+// ===== UTILS =====
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.openModal = function(id) { document.getElementById(id).classList.add('open'); }
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.showScreen = showScreen;
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const now = Date.now();
+  const diff = now - (ts.seconds ? ts.seconds * 1000 : ts);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'agora';
+  if (mins < 60) return `${mins}min atrás`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h atrás`;
+  return `${Math.floor(hrs/24)}d atrás`;
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+function daysLeft(ts) {
+  if (!ts) return 0;
+  const expiry = ts.toDate ? ts.toDate().getTime() : ts;
+  return Math.ceil((expiry - Date.now()) / 86400000);
+}
+
+// ===== AUTH INIT =====
+onAuthStateChanged(auth, async (firebaseUser) => {
+  if (!firebaseUser) {
+    showScreen('login');
+    return;
+  }
+  try {
+    currentUser = await getCurrentUser();
+    if (!currentUser) { showScreen('login'); return; }
+    if (currentUser.isAdmin) {
+      showScreen('admin');
+      loadAdminData();
+    } else {
+      showScreen('main');
+      initMainApp();
+    }
+  } catch(e) {
+    showScreen('login');
+  }
+});
+
+// ===== SPLASH =====
+setTimeout(() => {
+  if (!auth.currentUser) showScreen('login');
+}, 3000);
+
+// ===== LOGIN =====
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showToast('Preencha todos os campos'); return; }
+  try {
+    currentUser = await loginUser(email, password);
+    if (currentUser.isAdmin) {
+      showScreen('admin');
+      loadAdminData();
+    } else {
+      showScreen('main');
+      initMainApp();
+    }
+  } catch(e) {
+    const msgs = {
+      'EXPIRED': 'EXPIRADO',
+      'BLOCKED': '🚫 Conta bloqueada. WhatsApp: (27) 99273-4399',
+      'auth/invalid-credential': 'E-mail ou senha incorretos',
+      'auth/user-not-found': 'E-mail não cadastrado',
+      'auth/wrong-password': 'Senha incorreta',
+      'auth/too-many-requests': 'Muitas tentativas. Tente mais tarde.',
+    };
+    const msg = msgs[e.message] || msgs[e.code] || 'Erro ao fazer login';
+    const banner = document.getElementById('loginBanner');
+    if (e.message === 'EXPIRED') {
+      banner.innerHTML = msg;
+      banner.style.display = 'none';
+      showScreen('expired');
+    } else {
+      banner.textContent = msg;
+      banner.style.display = 'block';
+    }
+  }
+}
+
+window.showRegister = function() { showScreen('register'); }
+window.showLogin = function() { showScreen('login'); }
+
+window.forgotPassword = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { showToast('Digite seu e-mail primeiro'); return; }
+  try {
+    await resetPassword(email);
+    showToast('✅ Email de recuperação enviado!');
+  } catch(e) { showToast('Erro ao enviar email'); }
+}
+
+// ===== REGISTER =====
+window.doRegister = async function() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const city = document.getElementById('regCity').value.trim();
+  const state = document.getElementById('regState').value;
+  const bikeModel = document.getElementById('regBike').value.trim();
+  const bikeYear = document.getElementById('regBikeYear').value.trim();
+  const bikingStyle = document.getElementById('regStyle').value;
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  const terms = document.getElementById('regTerms').checked;
+
+  if (!name || !email || !phone || !city || !bikeModel) { showToast('Preencha todos os campos'); return; }
+  if (password.length < 6) { showToast('Senha mínimo 6 caracteres'); return; }
+  if (password !== confirm) { showToast('Senhas não coincidem'); return; }
+  if (!terms) { showToast('Aceite os termos de uso'); return; }
+
+  try {
+    currentUser = await registerUser({ email, password, name, phone, city, state, bikeModel, bikeYear, bikingStyle });
+    showToast('🏍️ Bem-vindo ao StreetBike!');
+    showScreen('main');
+    initMainApp();
+  } catch(e) {
+    const msgs = {
+      'auth/email-already-in-use': 'E-mail já cadastrado',
+      'auth/weak-password': 'Senha muito fraca',
+      'auth/invalid-email': 'E-mail inválido'
+    };
+    showToast(msgs[e.code] || 'Erro no cadastro: ' + e.message);
+  }
+}
+
+// ===== LOGOUT =====
+window.doLogout = async function() {
+  if (!confirm('Deseja sair?')) return;
+  await logoutUser();
+  currentUser = null;
+  showScreen('login');
+}
+
+// ===== MAIN APP =====
+function initMainApp() {
+  loadProfile();
+  loadFeed();
+  checkExpiryBanner();
+}
+
+function checkExpiryBanner() {
+  if (!currentUser) return;
+  const days = daysLeft(currentUser.expirationDate);
+  const banner = document.getElementById('expiryBanner');
+  if (days <= 7 && days > 0) {
+    banner.style.display = 'flex';
+    document.getElementById('expiryBannerText').textContent = `⚠️ Seu acesso expira em ${days} dias`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ===== TABS =====
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`tab-${tab}`)?.classList.add('active');
+  document.getElementById(`nav-${tab}`)?.classList.add('active');
+
+  if (tab === 'routes' && document.getElementById('routesList').children.length <= 1) loadRoutes();
+  if (tab === 'chat') loadChatList();
+  if (tab === 'events' && document.getElementById('eventsList').children.length <= 1) loadEvents();
+  if (tab === 'marketplace' && document.getElementById('marketplaceList').children.length <= 1) loadMarketplace();
+  if (tab === 'profile') loadProfile();
+}
+
+// ===== PROFILE =====
+async function loadProfile() {
+  currentUser = await getCurrentUser();
+  if (!currentUser) return;
+  const initials = currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('profileAvatar').textContent = initials;
+  document.getElementById('profileName').textContent = currentUser.name;
+  document.getElementById('profileBike').textContent = `🏍️ ${currentUser.bikeModel} ${currentUser.bikeYear}`;
+  document.getElementById('profileCity').textContent = `📍 ${currentUser.city} - ${currentUser.state}`;
+  document.getElementById('profileKm').textContent = Math.round(currentUser.totalKm || 0);
+  document.getElementById('profileRoutes').textContent = currentUser.totalRoutes || 0;
+  document.getElementById('profileStyle').textContent = (currentUser.bikingStyle || '—').split('/')[0].trim();
+  document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+
+  const days = daysLeft(currentUser.expirationDate);
+  const expiryEl = document.getElementById('profileExpiry');
+  const expDate = currentUser.expirationDate?.toDate ? currentUser.expirationDate.toDate() : new Date();
+  const dateStr = expDate.toLocaleDateString('pt-BR');
+  if (days <= 0) {
+    expiryEl.textContent = `❌ Expirado (${dateStr})`;
+    expiryEl.className = 'expiry-value expiry-red';
+  } else if (days <= 5) {
+    expiryEl.textContent = `🔴 ${days} dias restantes (${dateStr})`;
+    expiryEl.className = 'expiry-value expiry-red';
+  } else if (days <= 15) {
+    expiryEl.textContent = `🟡 ${days} dias restantes (${dateStr})`;
+    expiryEl.className = 'expiry-value expiry-yellow';
+  } else {
+    expiryEl.textContent = `🟢 ${days} dias restantes (${dateStr})`;
+    expiryEl.className = 'expiry-value expiry-green';
+  }
+}
+
+// ===== FEED =====
+async function loadFeed() {
+  const list = document.getElementById('feedList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const posts = await getPosts(20);
+    if (!posts.length) {
+      list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-newspaper"></i><h3>Sem publicações</h3><p>Seja o primeiro a postar!</p></div>`;
+      return;
+    }
+    list.innerHTML = posts.map(p => `
+      <div class="post-card">
+        <div class="post-header">
+          <div class="avatar">${(p.authorName||'?')[0].toUpperCase()}</div>
+          <div>
+            <div class="post-author">${p.authorName || 'Ciclista'}</div>
+            <div class="post-meta">${timeAgo(p.createdAt)}</div>
+          </div>
+          <div class="post-category">${p.category || 'Geral'}</div>
+        </div>
+        <div class="post-content">${p.content}</div>
+        <div class="post-actions">
+          <button class="action-btn ${p.likedBy?.includes(currentUser?.uid) ? 'liked' : ''}" onclick="handleLike('${p.id}',this)">
+            <i class="fa-${p.likedBy?.includes(currentUser?.uid) ? 'solid' : 'regular'} fa-heart"></i> ${p.likes || 0}
+          </button>
+          <button class="action-btn" onclick="openComments('${p.id}')">
+            <i class="fa-regular fa-comment"></i> ${p.commentsCount || 0}
+          </button>
+          <button class="action-btn" onclick="sharePost('${p.content}')">
+            <i class="fa-solid fa-share-nodes"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-wifi"></i><h3>Sem conexão</h3><p>Verifique sua internet</p></div>`;
+  }
+}
+
+window.handleLike = async function(postId, btn) {
+  if (!currentUser) return;
+  await toggleLike(postId, currentUser.uid);
+  loadFeed();
+}
+
+window.openComments = function(postId) { showToast('Comentários em breve!'); }
+window.sharePost = function(content) {
+  if (navigator.share) navigator.share({ text: content });
+  else showToast('Link copiado!');
+}
+
+window.submitPost = async function() {
+  const content = document.getElementById('postContent').value.trim();
+  const category = document.getElementById('postCategory').value;
+  if (!content) { showToast('Escreva algo antes de publicar'); return; }
+  try {
+    await createPost(content, category);
+    closeModal('createPostModal');
+    document.getElementById('postContent').value = '';
+    showToast('✅ Publicado!');
+    loadFeed();
+    switchTab('home');
+  } catch(e) { showToast('Erro ao publicar'); }
+}
+
+// ===== ROUTES =====
+async function loadRoutes(difficulty = '') {
+  const list = document.getElementById('routesList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    allRoutes = await getRoutes();
+    renderRoutes(difficulty);
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-map"></i><h3>Sem rotas</h3></div>';
+  }
+}
+
+function renderRoutes(difficulty = '') {
+  const list = document.getElementById('routesList');
+  const filtered = difficulty ? allRoutes.filter(r => r.difficulty === difficulty) : allRoutes;
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-map"></i><h3>Nenhuma rota encontrada</h3></div>';
+    return;
+  }
+  const diffClass = { 'Fácil':'diff-easy','Moderado':'diff-medium','Difícil':'diff-hard','Extremo':'diff-extreme' };
+  list.innerHTML = filtered.map(r => `
+    <div class="route-card">
+      <div class="route-card-header">
+        <div>
+          <div class="route-title">${r.title}</div>
+          <div class="route-creator">por ${r.creatorName}</div>
+        </div>
+        <div class="difficulty-badge ${diffClass[r.difficulty]||'diff-easy'}">${r.difficulty}</div>
+      </div>
+      <div class="route-stats">
+        <div class="route-stat"><i class="fa-solid fa-road"></i> ${r.distanceKm || 0} km</div>
+        <div class="route-stat"><i class="fa-solid fa-clock"></i> ${r.estimatedTimeMin || 0} min</div>
+        <div class="route-stat"><i class="fa-solid fa-mountain-sun"></i> ${r.terrainType || 'Asfalto'}</div>
+        ${r.city ? `<div class="route-stat"><i class="fa-solid fa-location-dot"></i> ${r.city}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.filterRoutes = function(difficulty, el) {
+  document.querySelectorAll('#tab-routes .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderRoutes(difficulty);
+}
+
+window.submitRoute = async function() {
+  const title = document.getElementById('routeTitle').value.trim();
+  const description = document.getElementById('routeDesc').value.trim();
+  if (!title) { showToast('Informe o título da rota'); return; }
+  try {
+    await createRoute({
+      title, description,
+      difficulty: document.getElementById('routeDiff').value,
+      terrainType: document.getElementById('routeTerrain').value,
+      distanceKm: parseFloat(document.getElementById('routeKm').value) || 0,
+      estimatedTimeMin: parseInt(document.getElementById('routeTime').value) || 0,
+      city: document.getElementById('routeCity').value.trim()
+    });
+    closeModal('createRouteModal');
+    showToast('✅ Rota cadastrada!');
+    loadRoutes();
+  } catch(e) { showToast('Erro ao criar rota'); }
+}
+
+// ===== EVENTS =====
+async function loadEvents() {
+  const list = document.getElementById('eventsList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const events = await getEvents();
+    if (!events.length) {
+      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><h3>Sem eventos</h3><p>Crie o primeiro evento!</p></div>';
+      return;
+    }
+    list.innerHTML = events.map(e => {
+      const date = e.eventDate?.toDate ? e.eventDate.toDate() : new Date();
+      const dateStr = date.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+      const joined = e.participants?.includes(currentUser?.uid);
+      const spotsLeft = e.maxParticipants ? e.maxParticipants - (e.participants?.length || 0) : null;
+      return `
+        <div class="event-card">
+          <div class="event-date-strip">
+            <i class="fa-solid fa-calendar-check"></i>
+            <div class="event-date-text">${dateStr}</div>
+          </div>
+          <div class="event-body">
+            <div class="event-title">${e.title}</div>
+            <div class="event-category-badge">${e.category || 'Passeio'}</div>
+            <div class="event-info">
+              ${e.location ? `<div class="event-row"><i class="fa-solid fa-location-dot"></i> ${e.location}</div>` : ''}
+              <div class="event-row"><i class="fa-solid fa-user-group"></i> ${e.participants?.length || 0} participantes${spotsLeft !== null ? ` · ${spotsLeft} vagas` : ''}</div>
+              <div class="event-row"><i class="fa-solid fa-tag"></i> ${e.price > 0 ? `R$ ${e.price}` : 'Gratuito'}</div>
+            </div>
+          </div>
+          <div class="event-footer">
+            <div class="participants-text">${e.description?.substring(0,60) || ''}</div>
+            <button class="btn-join ${joined ? 'btn-joined' : ''}" onclick="handleJoin('${e.id}',${joined})">
+              ${joined ? '✓ Inscrito' : 'Participar'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><h3>Sem conexão</h3></div>';
+  }
+}
+
+window.handleJoin = async function(eventId, alreadyJoined) {
+  if (alreadyJoined) { showToast('Você já está inscrito!'); return; }
+  try {
+    await joinEvent(eventId, currentUser.uid);
+    showToast('✅ Inscrito no evento!');
+    loadEvents();
+  } catch(e) { showToast('Erro ao se inscrever'); }
+}
+
+window.submitEvent = async function() {
+  const title = document.getElementById('eventTitle').value.trim();
+  const eventDateStr = document.getElementById('eventDate').value;
+  if (!title || !eventDateStr) { showToast('Título e data são obrigatórios'); return; }
+  try {
+    await createEvent({
+      title,
+      description: document.getElementById('eventDesc').value.trim(),
+      eventDate: Timestamp.fromDate(new Date(eventDateStr)),
+      category: document.getElementById('eventCategory').value,
+      location: document.getElementById('eventLocation').value.trim(),
+      maxParticipants: parseInt(document.getElementById('eventSpots').value) || 0,
+      price: parseFloat(document.getElementById('eventPrice').value) || 0,
+      isFree: !(parseFloat(document.getElementById('eventPrice').value) > 0)
+    });
+    closeModal('createEventModal');
+    showToast('✅ Evento criado!');
+    loadEvents();
+  } catch(e) { showToast('Erro ao criar evento'); }
+}
+
+// ===== NOTIFICATIONS =====
+window.openNotifications = async function() {
+  showScreen('notifications');
+  const list = document.getElementById('notifList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const notifs = await getNotifications(currentUser.uid);
+    document.getElementById('notifBtn').classList.remove('notif-badge');
+    if (!notifs.length) {
+      list.innerHTML = '<div class="empty-state"><i class="fa-regular fa-bell-slash"></i><h3>Sem notificações</h3></div>';
+      return;
+    }
+    list.innerHTML = notifs.map(n => `
+      <div class="notif-card ${n.isRead ? '' : 'unread'}" onclick="readNotif('${n.id}',this)">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-msg">${n.message}</div>
+        <div class="notif-time">${timeAgo(n.createdAt)}</div>
+      </div>
+    `).join('');
+  } catch(e) { list.innerHTML = '<div class="empty-state"><h3>Erro ao carregar</h3></div>'; }
+}
+
+window.readNotif = async function(id, el) {
+  el.classList.remove('unread');
+  await markRead(id);
+}
+
+// ===== MAINTENANCE =====
+window.openMaintenance = async function() {
+  openModal('maintenanceModal');
+  await loadMaintenanceItems();
+}
+
+async function loadMaintenanceItems() {
+  const content = document.getElementById('maintContent');
+  content.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const items = await getMaintenance();
+    const currentKm = currentUser?.totalKm || 0;
+    if (!items.length) {
+      content.innerHTML = '<div class="empty-state" style="padding:30px"><i class="fa-solid fa-wrench"></i><p>Nenhum item. Adicione o primeiro!</p></div>';
+      return;
+    }
+    content.innerHTML = items.map(item => {
+      const progress = Math.min((currentKm - item.lastServiceKm) / item.intervalKm * 100, 100);
+      const progClass = progress >= 100 ? 'prog-danger' : progress >= 80 ? 'prog-warn' : 'prog-ok';
+      const nextKm = (item.lastServiceKm || 0) + (item.intervalKm || 3000);
+      return `
+        <div class="maint-card">
+          <div class="maint-card-top">
+            <div class="maint-component">${item.bikeComponent}</div>
+            <div style="font-size:12px;color:var(--gray)">Próx: ${nextKm}km</div>
+          </div>
+          <div class="maint-progress"><div class="maint-progress-bar ${progClass}" style="width:${progress}%"></div></div>
+          <div class="maint-next">${progress >= 100 ? '⚠️ Revisão necessária!' : `${Math.round(progress)}% do intervalo`}${item.notes ? ` · ${item.notes}` : ''}</div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) { content.innerHTML = '<div class="empty-state"><p>Erro ao carregar</p></div>'; }
+}
+
+window.submitMaintItem = async function() {
+  const component = document.getElementById('maintComponent').value;
+  const lastKm = parseFloat(document.getElementById('maintLastKm').value) || 0;
+  const interval = parseFloat(document.getElementById('maintInterval').value) || 3000;
+  const notes = document.getElementById('maintNotes').value.trim();
+  try {
+    await saveMaintenance({ bikeComponent: component, lastServiceKm: lastKm, intervalKm: interval, nextServiceKm: lastKm + interval, notes });
+    closeModal('addMaintModal');
+    showToast('✅ Item salvo!');
+    loadMaintenanceItems();
+  } catch(e) { showToast('Erro ao salvar'); }
+}
+
+// ===== MARKETPLACE =====
+async function loadMarketplace() {
+  const list = document.getElementById('marketplaceList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const items = await getMarketplace();
+    if (!items.length) {
+      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-tag"></i><h3>Sem anúncios</h3><p>Seja o primeiro a anunciar!</p></div>';
+      return;
+    }
+    list.innerHTML = items.map(item => `
+      <div class="listing-card">
+        <div class="listing-body">
+          <div class="listing-title">${item.title}</div>
+          <div class="listing-price">R$ ${parseFloat(item.price).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+          <div class="listing-info">
+            <div class="listing-tag">${item.category}</div>
+            <div class="listing-tag">${item.condition}</div>
+            ${item.city ? `<div class="listing-tag">📍 ${item.city}</div>` : ''}
+          </div>
+          <p style="font-size:13px;color:var(--gray);margin-top:8px;">${item.description?.substring(0,100)||''}</p>
+        </div>
+        <div class="listing-seller">
+          <div class="seller-name">Vendedor: <span>${item.sellerName}</span></div>
+          <button class="contact-btn" onclick="contactSeller('${item.sellerPhone}','${item.title}')">
+            <i class="fa-brands fa-whatsapp"></i> Contato
+          </button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { list.innerHTML = '<div class="empty-state"><h3>Erro ao carregar</h3></div>'; }
+}
+
+window.contactSeller = function(phone, title) {
+  const msg = encodeURIComponent(`Olá! Vi seu anúncio "${title}" no StreetBike. Tem interesse em negociar?`);
+  window.open(`https://wa.me/55${phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+}
+
+window.submitListing = async function() {
+  const title = document.getElementById('listingTitle').value.trim();
+  if (!title) { showToast('Informe o título'); return; }
+  try {
+    await createListing({
+      title,
+      description: document.getElementById('listingDesc').value.trim(),
+      price: parseFloat(document.getElementById('listingPrice').value) || 0,
+      category: document.getElementById('listingCategory').value,
+      condition: document.getElementById('listingCondition').value,
+      city: document.getElementById('listingCity').value.trim()
+    });
+    closeModal('createListingModal');
+    showToast('✅ Anúncio publicado!');
+    loadMarketplace();
+  } catch(e) { showToast('Erro ao publicar'); }
+}
+
+// ===== ADMIN =====
+async function loadAdminData() {
+  try {
+    const stats = await getAdminStats();
+    document.getElementById('statTotal').textContent = stats.total;
+    document.getElementById('statActive').textContent = stats.active;
+    document.getElementById('statExpiring').textContent = stats.expiring;
+    document.getElementById('statExpired').textContent = stats.expired;
+    allAdminUsers = await getAllUsers();
+    renderAdminUsers();
+  } catch(e) { showToast('Erro ao carregar dados'); }
+}
+
+function renderAdminUsers() {
+  const search = document.getElementById('adminSearch').value.toLowerCase();
+  const now = Date.now();
+  let filtered = allAdminUsers.filter(u => {
+    if (search) return u.name?.toLowerCase().includes(search) || u.email?.toLowerCase().includes(search) || u.city?.toLowerCase().includes(search);
+    if (currentAdminTab === 'active') return u.isActive && !u.isExpired;
+    if (currentAdminTab === 'expiring') {
+      const d = (u.expirationDate?.toDate?.().getTime() - now) / 86400000;
+      return d >= 0 && d <= 7 && !u.isExpired;
+    }
+    if (currentAdminTab === 'expired') return u.isExpired;
+    return true;
+  });
+
+  const list = document.getElementById('adminList');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-users-slash"></i><h3>Nenhum usuário</h3></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(u => {
+    const days = Math.ceil(((u.expirationDate?.toDate?.().getTime() || 0) - now) / 86400000);
+    const expDate = u.expirationDate?.toDate?.()?.toLocaleDateString('pt-BR') || '—';
+    let badge, badgeClass;
+    if (!u.isActive) { badge = 'Bloqueado'; badgeClass = 'badge-blocked'; }
+    else if (u.isExpired || days <= 0) { badge = 'Expirado'; badgeClass = 'badge-expired'; }
+    else if (days <= 7) { badge = `${days}d 🟡`; badgeClass = 'badge-expiring'; }
+    else { badge = 'Ativo'; badgeClass = 'badge-active'; }
+
+    return `
+      <div class="user-card">
+        <div class="user-card-top">
+          <div class="user-avatar">${(u.name||'?')[0].toUpperCase()}</div>
+          <div class="user-info">
+            <div class="user-name">${u.name}</div>
+            <div class="user-email">${u.email}</div>
+          </div>
+          <div class="status-badge ${badgeClass}">${badge}</div>
+        </div>
+        <div class="user-details">
+          <div class="user-detail">🏍️ <span>${u.bikeModel||'—'}</span></div>
+          <div class="user-detail">📍 <span>${u.city||'—'} - ${u.state||''}</span></div>
+          <div class="user-detail">📅 <span>${expDate}</span></div>
+          <div class="user-detail">📱 <span>${u.phone||'—'}</span></div>
+        </div>
+        <div class="user-actions">
+          <button class="user-btn btn-renew" onclick="openRenew('${u.uid}','${u.name}')">✅ Renovar</button>
+          <button class="user-btn ${u.isActive ? 'btn-block' : 'btn-unblock'}" onclick="blockUser('${u.uid}',${u.isActive},'${u.name}')">
+            ${u.isActive ? '🚫 Bloquear' : '✅ Ativar'}
+          </button>
+          <button class="user-btn btn-msg" onclick="openUserMsg('${u.uid}','${u.name}')">💬</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.filterAdminUsers = function() { renderAdminUsers(); }
+window.setAdminTab = function(tab, el) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderAdminUsers();
+}
+
+window.openRenew = function(uid, name) {
+  selectedUserForAction = uid;
+  document.getElementById('renewName').textContent = `Usuário: ${name}`;
+  openModal('renewModal');
+}
+
+window.confirmRenew = async function(days) {
+  if (!selectedUserForAction) return;
+  try {
+    await renewAccess(selectedUserForAction, days);
+    closeModal('renewModal');
+    showToast(`✅ Acesso renovado por ${days} dias!`);
+    loadAdminData();
+  } catch(e) { showToast('Erro ao renovar'); }
+}
+
+window.blockUser = async function(uid, isActive, name) {
+  const action = isActive ? 'bloquear' : 'ativar';
+  if (!confirm(`Deseja ${action} a conta de ${name}?`)) return;
+  try {
+    await toggleUserActive(uid, !isActive);
+    showToast(`✅ Conta ${isActive ? 'bloqueada' : 'ativada'}!`);
+    loadAdminData();
+  } catch(e) { showToast('Erro ao alterar conta'); }
+}
+
+window.openUserMsg = function(uid, name) {
+  selectedUserForAction = uid;
+  document.getElementById('msgRecipient').textContent = `Para: ${name}`;
+  openModal('sendMsgModal');
+}
+
+window.submitUserMsg = async function() {
+  const title = document.getElementById('msgTitle').value.trim();
+  const content = document.getElementById('msgContent').value.trim();
+  if (!title || !content) { showToast('Preencha título e mensagem'); return; }
+  try {
+    await sendNotificationToUser(selectedUserForAction, title, content);
+    closeModal('sendMsgModal');
+    document.getElementById('msgTitle').value = '';
+    document.getElementById('msgContent').value = '';
+    showToast('✅ Mensagem enviada!');
+  } catch(e) { showToast('Erro ao enviar'); }
+}
+
+window.submitBroadcast = async function() {
+  const title = document.getElementById('broadcastTitle').value.trim();
+  const msg = document.getElementById('broadcastMsg').value.trim();
+  if (!title || !msg) { showToast('Preencha todos os campos'); return; }
+  try {
+    await sendBroadcast(title, msg);
+    closeModal('broadcastModal');
+    document.getElementById('broadcastTitle').value = '';
+    document.getElementById('broadcastMsg').value = '';
+    showToast('✅ Broadcast enviado para todos!');
+  } catch(e) { showToast('Erro ao enviar broadcast'); }
+}
+
+// ===== CHAT =====
+let currentRoom = null;
+
+async function loadChatList() {
+  const list = document.getElementById('chatList');
+  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    await ensureGlobalChat();
+    const rooms = await getChatRooms(currentUser.uid);
+    if (!rooms.length) {
+      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-comments"></i><h3>Sem chats</h3><p>Crie um grupo ou entre no chat geral!</p></div>';
+      return;
+    }
+    list.innerHTML = rooms.map(r => {
+      const isGroup = r.type === 'group';
+      const icon = isGroup ? '👥' : '🌎';
+      const isMember = r.type === 'global' || r.members?.includes(currentUser.uid);
+      return `
+        <div class="chat-item" onclick="openRoom('${r.id}','${r.name.replace(/'/g,'')}','${r.type}',${isMember})">
+          <div class="chat-icon ${isGroup ? 'group' : ''}">${icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="chat-name">${r.name}</div>
+            <div class="chat-preview">${r.lastMessage || 'Sem mensagens ainda'}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="chat-time">${timeAgo(r.lastMessageAt)}</div>
+            ${isGroup && !isMember ? '<div style="font-size:11px;color:var(--orange);">Entrar</div>' : ''}
+            ${r.membersCount ? `<div style="font-size:11px;color:var(--gray);">${r.membersCount} membros</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><h3>Erro ao carregar</h3></div>';
+  }
+}
+
+window.openRoom = async function(roomId, name, type, isMember) {
+  if (!isMember) {
+    if (!confirm(`Entrar no grupo "${name}"?`)) return;
+    await joinRoom(roomId, currentUser.uid);
+  }
+  currentRoom = { id: roomId, name, type };
+  document.getElementById('convName').textContent = name;
+  document.getElementById('convAvatar').textContent = type === 'group' ? '👥' : '🌎';
+  document.getElementById('convMenuBtn').style.display = type === 'group' ? 'flex' : 'none';
+  showScreen('conversation');
+  await loadMessages(roomId);
+}
+
+async function loadMessages(roomId) {
+  const msgs = document.getElementById('convMessages');
+  msgs.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+  try {
+    const messages = await getChatMessages(roomId, 60);
+    if (!messages.length) {
+      msgs.innerHTML = '<div class="empty-state" style="padding:40px"><i class="fa-regular fa-comment"></i><p>Seja o primeiro a enviar uma mensagem!</p></div>';
+      return;
+    }
+    msgs.innerHTML = messages.map(m => {
+      const mine = m.senderUid === currentUser.uid;
+      return `
+        <div style="display:flex;flex-direction:column;align-items:${mine ? 'flex-end' : 'flex-start'};">
+          ${!mine ? `<div class="msg-author">${m.senderName}</div>` : ''}
+          <div class="msg-bubble ${mine ? 'msg-mine' : 'msg-other'}">
+            ${m.text}
+            <div class="msg-time">${timeAgo(m.createdAt)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(e) {
+    msgs.innerHTML = '<div class="empty-state"><h3>Erro ao carregar</h3></div>';
+  }
+}
+
+window.sendMessage = async function() {
+  const input = document.getElementById('convInput');
+  const text = input.value.trim();
+  if (!text || !currentRoom) return;
+  input.value = '';
+  try {
+    await sendChatMessage(currentRoom.id, text, currentUser);
+    await loadMessages(currentRoom.id);
+  } catch(e) { showToast('Erro ao enviar'); }
+}
+
+window.submitCreateGroup = async function() {
+  const name = document.getElementById('groupName').value.trim();
+  const desc = document.getElementById('groupDesc').value.trim();
+  const cat = document.getElementById('groupCategory').value;
+  if (!name) { showToast('Informe o nome do grupo'); return; }
+  try {
+    const roomId = await createGroup(name, desc, cat, currentUser.uid, currentUser.name);
+    closeModal('createGroupModal');
+    document.getElementById('groupName').value = '';
+    document.getElementById('groupDesc').value = '';
+    showToast('✅ Grupo criado!');
+    loadChatList();
+    openRoom(roomId, name, 'group', true);
+  } catch(e) { showToast('Erro ao criar grupo'); }
+}
+
+window.leaveGroup = async function() {
+  if (!currentRoom || !confirm('Sair do grupo?')) return;
+  try {
+    await leaveRoom(currentRoom.id, currentUser.uid);
+    closeModal('groupInfoModal');
+    showScreen('main');
+    switchTab('chat');
+    showToast('Você saiu do grupo');
+  } catch(e) { showToast('Erro ao sair'); }
+}
+
+// ===== EXPIRED / WHATSAPP =====
+window.openWhatsAppSupport = function() {
+  const msg = encodeURIComponent('Olá! Meu acesso no StreetBike expirou. Segue o comprovante de pagamento para renovação.');
+  window.open('https://wa.me/5527992734399?text=' + msg, '_blank');
+}
+
+</script>
+</body>
+</html>
