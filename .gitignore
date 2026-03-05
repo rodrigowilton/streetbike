@@ -1,0 +1,2 @@
+# Garantir que node_modules seja ignorado
+node_modules/
