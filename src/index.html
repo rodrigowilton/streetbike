@@ -1355,6 +1355,24 @@
     </div>
   </div>
 
+  <!-- Route Detail Modal -->
+  <div id="routeDetailModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div id="routeDetailContent"></div>
+      <button class="btn-outline" style="margin-top:16px;" onclick="closeModal('routeDetailModal')">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Event Detail Modal -->
+  <div id="eventDetailModal" class="modal-overlay">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div id="eventDetailContent"></div>
+      <button class="btn-outline" style="margin-top:16px;" onclick="closeModal('eventDetailModal')">Fechar</button>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div id="toast" class="toast"></div>
 </div>
@@ -1703,24 +1721,27 @@ function renderRoutes(difficulty = '') {
     return;
   }
   const diffClass = { 'Fácil':'diff-easy','Moderado':'diff-medium','Difícil':'diff-hard','Extremo':'diff-extreme' };
-  list.innerHTML = filtered.map(r => `
-    <div class="route-card">
+  list.innerHTML = filtered.map(r => {
+    const isMine = r.creatorUid === currentUser?.uid;
+    const dc = diffClass[r.difficulty]||'diff-easy';
+    return `
+    <div class="route-card" onclick="viewRoute('${r.id}')">
       <div class="route-card-header">
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="route-title">${r.title}</div>
           <div class="route-creator">por ${r.creatorName}</div>
         </div>
-        <div class="difficulty-badge ${diffClass[r.difficulty]||'diff-easy'}">${r.difficulty}</div>
-        ${r.creatorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteRoute('${r.id}',event)"><i class="fa-solid fa-trash"></i></button>` : ''}
+        <div class="difficulty-badge ${dc}">${r.difficulty||''}</div>
+        ${isMine ? `<button class="btn-delete" onclick="confirmDeleteRoute(event,'${r.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
       </div>
       <div class="route-stats">
-        <div class="route-stat"><i class="fa-solid fa-road"></i> ${r.distanceKm || 0} km</div>
-        <div class="route-stat"><i class="fa-solid fa-clock"></i> ${r.estimatedTimeMin || 0} min</div>
-        <div class="route-stat"><i class="fa-solid fa-mountain-sun"></i> ${r.terrainType || 'Asfalto'}</div>
+        <div class="route-stat"><i class="fa-solid fa-road"></i> ${r.distanceKm||0} km</div>
+        <div class="route-stat"><i class="fa-solid fa-clock"></i> ${r.estimatedTimeMin||0} min</div>
+        <div class="route-stat"><i class="fa-solid fa-mountain-sun"></i> ${r.terrainType||'Asfalto'}</div>
         ${r.city ? `<div class="route-stat"><i class="fa-solid fa-location-dot"></i> ${r.city}</div>` : ''}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 window.filterRoutes = function(difficulty, el) {
@@ -1754,36 +1775,39 @@ async function loadEvents() {
   list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
   try {
     const events = await getEvents();
+    window._loadedEvents = events;
     if (!events.length) {
       list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><h3>Sem eventos</h3><p>Crie o primeiro evento!</p></div>';
       return;
     }
-    list.innerHTML = events.map(e => {
-      const date = e.eventDate?.toDate ? e.eventDate.toDate() : new Date();
+    list.innerHTML = events.map(ev => {
+      const date = ev.eventDate?.toDate ? ev.eventDate.toDate() : new Date();
       const dateStr = date.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      const joined = e.participants?.includes(currentUser?.uid);
-      const spotsLeft = e.maxParticipants ? e.maxParticipants - (e.participants?.length || 0) : null;
+      const joined = ev.participants?.includes(currentUser?.uid);
+      const spotsLeft = ev.maxParticipants ? ev.maxParticipants - (ev.participants?.length||0) : null;
+      const isMine = ev.creatorUid === currentUser?.uid;
       return `
         <div class="event-card">
           <div class="event-date-strip">
             <i class="fa-solid fa-calendar-check"></i>
             <div class="event-date-text">${dateStr}</div>
           </div>
-          <div class="event-body">
-            <div class="event-title">${e.title}</div>
-            <div class="event-category-badge">${e.category || 'Passeio'}</div>
+          <div class="event-body" onclick="viewEvent('${ev.id}')" style="cursor:pointer;">
+            <div class="event-title">${ev.title}</div>
+            <div class="event-category-badge">${ev.category||'Passeio'}</div>
             <div class="event-info">
-              ${e.location ? `<div class="event-row"><i class="fa-solid fa-location-dot"></i> ${e.location}</div>` : ''}
-              <div class="event-row"><i class="fa-solid fa-user-group"></i> ${e.participants?.length || 0} participantes${spotsLeft !== null ? ` · ${spotsLeft} vagas` : ''}</div>
-              <div class="event-row"><i class="fa-solid fa-tag"></i> ${e.price > 0 ? `R$ ${e.price}` : 'Gratuito'}</div>
+              ${ev.location ? `<div class="event-row"><i class="fa-solid fa-location-dot"></i> ${ev.location}</div>` : ''}
+              <div class="event-row"><i class="fa-solid fa-user-group"></i> ${ev.participants?.length||0} participantes${spotsLeft!==null?` · ${spotsLeft} vagas`:''}</div>
+              <div class="event-row"><i class="fa-solid fa-tag"></i> ${ev.price>0?`R$ ${ev.price}`:'Gratuito'}</div>
             </div>
+            ${ev.description ? `<div style="font-size:13px;color:var(--gray);margin-top:6px;">${ev.description.substring(0,80)}${ev.description.length>80?'...':''}</div>` : ''}
           </div>
           <div class="event-footer">
-            <div class="participants-text">${e.description?.substring(0,60) || ''}</div>
+            <button class="btn-outline" style="padding:8px 12px;font-size:13px;" onclick="viewEvent('${ev.id}')">Ver mais</button>
             <div style="display:flex;gap:8px;align-items:center;">
-              ${e.creatorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteEvent('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
-              <button class="btn-join ${joined ? 'btn-joined' : ''}" onclick="handleJoin('${e.id}',${joined})">
-                ${joined ? '✓ Inscrito' : 'Participar'}
+              ${isMine ? `<button class="btn-delete" onclick="confirmDeleteEvent('${ev.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+              <button class="btn-join ${joined?'btn-joined':''}" onclick="handleJoin('${ev.id}',${joined})">
+                ${joined?'✓ Inscrito':'Participar'}
               </button>
             </div>
           </div>
@@ -2276,8 +2300,9 @@ window.deletePost = async function(postId) {
   } catch(e) { showToast('Erro ao excluir'); }
 }
 
-window.deleteRoute = async function(routeId, event) {
-  event?.stopPropagation();
+// confirmDeleteRoute receives native JS event to stop propagation
+window.confirmDeleteRoute = async function(ev, routeId) {
+  ev.stopPropagation();
   if (!confirm('Excluir esta rota?')) return;
   try {
     await deleteItem('routes', routeId);
@@ -2286,11 +2311,23 @@ window.deleteRoute = async function(routeId, event) {
   } catch(e) { showToast('Erro ao excluir'); }
 }
 
-window.deleteEvent = async function(eventId) {
+
+window.confirmDeleteRouteFromDetail = async function(routeId) {
+  if (!confirm('Excluir esta rota?')) return;
+  try {
+    await deleteItem('routes', routeId);
+    showToast('✅ Rota excluída!');
+    closeModal('routeDetailModal');
+    loadRoutes();
+  } catch(e) { showToast('Erro ao excluir'); }
+}
+
+window.confirmDeleteEvent = async function(eventId) {
   if (!confirm('Excluir este evento?')) return;
   try {
     await deleteItem('events', eventId);
     showToast('✅ Evento excluído!');
+    closeModal('eventDetailModal');
     loadEvents();
   } catch(e) { showToast('Erro ao excluir'); }
 }
@@ -2302,6 +2339,70 @@ window.deleteListing = async function(listingId) {
     showToast('✅ Anúncio excluído!');
     loadMarketplace();
   } catch(e) { showToast('Erro ao excluir'); }
+}
+
+// ===== VIEW DETAIL =====
+window.viewRoute = function(routeId) {
+  const r = allRoutes.find(x => x.id === routeId);
+  if (!r) return;
+  const diffClass = { 'Fácil':'diff-easy','Moderado':'diff-medium','Difícil':'diff-hard','Extremo':'diff-extreme' };
+  const isMine = r.creatorUid === currentUser?.uid;
+  document.getElementById('routeDetailContent').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="modal-title" style="margin:0;">${r.title}</div>
+      <div class="difficulty-badge ${diffClass[r.difficulty]||'diff-easy'}">${r.difficulty}</div>
+    </div>
+    <div style="color:var(--gray);font-size:13px;margin-bottom:16px;">Criado por ${r.creatorName}</div>
+    ${r.description ? `<p style="font-size:15px;color:#DDD;line-height:1.6;margin-bottom:16px;">${r.description}</p>` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--orange);">${r.distanceKm||0}</div>
+        <div style="font-size:12px;color:var(--gray);">km</div>
+      </div>
+      <div style="background:var(--card2);border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--orange);">${r.estimatedTimeMin||0}</div>
+        <div style="font-size:12px;color:var(--gray);">minutos</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;align-items:center;font-size:14px;">
+        <i class="fa-solid fa-mountain-sun" style="color:var(--orange);width:16px;"></i> ${r.terrainType||'Asfalto'}
+      </div>
+      ${r.city ? `<div style="display:flex;gap:8px;align-items:center;font-size:14px;"><i class="fa-solid fa-location-dot" style="color:var(--orange);width:16px;"></i> ${r.city}</div>` : ''}
+    </div>
+    ${isMine ? `<button class="btn-outline" style="color:var(--red);border-color:var(--red);width:100%;margin-bottom:8px;" onclick="confirmDeleteRouteFromDetail('${r.id}')">🗑️ Excluir rota</button>` : ''}
+  `;
+  openModal('routeDetailModal');
+}
+
+window.viewEvent = function(eventId) {
+  const events = document.querySelectorAll('.event-card');
+  // Find from loaded data - use global store
+  const ev = window._loadedEvents?.find(x => x.id === eventId);
+  if (!ev) { showToast('Carregando...'); return; }
+  const date = ev.eventDate?.toDate?.() || new Date();
+  const dateStr = date.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const joined = ev.participants?.includes(currentUser?.uid);
+  const isMine = ev.creatorUid === currentUser?.uid;
+  document.getElementById('eventDetailContent').innerHTML = `
+    <div style="background:var(--orange);margin:-20px -20px 16px;padding:16px 20px;border-radius:12px 12px 0 0;">
+      <div style="font-family:var(--font-display);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">${ev.category||'Evento'}</div>
+      <div style="font-family:var(--font-display);font-size:24px;font-weight:800;">${ev.title}</div>
+      <div style="font-size:13px;opacity:.9;">${dateStr}</div>
+    </div>
+    ${ev.description ? `<p style="font-size:15px;color:#DDD;line-height:1.6;margin-bottom:16px;">${ev.description}</p>` : ''}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      ${ev.location ? `<div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-location-dot" style="color:var(--orange);width:16px;"></i><span>${ev.location}</span></div>` : ''}
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-user-group" style="color:var(--orange);width:16px;"></i><span>${ev.participants?.length||0} participantes${ev.maxParticipants?` de ${ev.maxParticipants} vagas`:''}</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-tag" style="color:var(--orange);width:16px;"></i><span>${ev.price>0?`R$ ${ev.price}`:'Gratuito'}</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-user" style="color:var(--orange);width:16px;"></i><span>Organizado por ${ev.creatorName}</span></div>
+    </div>
+    <button class="btn-primary ${joined?'':'btn-join'}" style="${joined?'background:var(--green);':''}" onclick="handleJoin('${ev.id}',${joined});closeModal('eventDetailModal')">
+      ${joined?'✓ Você está inscrito':'Participar do evento'}
+    </button>
+    ${isMine ? `<button class="btn-outline" style="color:var(--red);border-color:var(--red);width:100%;margin-top:8px;" onclick="confirmDeleteEvent('${ev.id}')">🗑️ Excluir evento</button>` : ''}
+  `;
+  openModal('eventDetailModal');
 }
 </script>
 </body>
