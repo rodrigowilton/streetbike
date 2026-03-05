@@ -5,7 +5,7 @@ import {
   sendPasswordResetEmail, signOut, onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 import {
-  getFirestore, doc, setDoc, getDoc, collection, query, where,
+  getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, where,
   orderBy, limit, getDocs, updateDoc, addDoc, Timestamp,
   serverTimestamp, increment, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
@@ -346,4 +346,9 @@ export async function ensureGlobalChat() {
       createdAt: serverTimestamp()
     });
   }
+}
+
+// ===================== DELETE =====================
+export async function deleteItem(collection_name, id) {
+  await deleteDoc(doc(db, collection_name, id));
 }

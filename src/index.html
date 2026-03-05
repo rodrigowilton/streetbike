@@ -557,6 +557,15 @@
     .scroll-content { flex: 1; overflow-y: auto; }
     .scroll-content::-webkit-scrollbar { display: none; }
 
+
+    /* ===== DELETE BUTTON ===== */
+    .btn-delete {
+      background: transparent; color: #555; border: none;
+      padding: 4px 8px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; transition: all .2s; margin-left: auto;
+    }
+    .btn-delete:hover { color: var(--red); background: #2a0f0f; }
+
     /* ===== CHAT ===== */
     .chat-screen { background: var(--black); }
     .chat-list { padding: 12px 16px; }
@@ -1326,7 +1335,8 @@ import {
   getAllUsers, renewAccess, toggleUserActive,
   sendNotificationToUser, sendBroadcast, getAdminStats,
   getChatRooms, createGroup, joinRoom, leaveRoom,
-  getChatMessages, sendChatMessage, ensureGlobalChat
+  getChatMessages, sendChatMessage, ensureGlobalChat,
+  deleteItem
 } from './services/firebase.js';
 
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
@@ -1600,6 +1610,7 @@ async function loadFeed() {
           <button class="action-btn" onclick="sharePost('${p.content}')">
             <i class="fa-solid fa-share-nodes"></i>
           </button>
+          ${p.authorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deletePost('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
         </div>
       </div>
     `).join('');
@@ -1662,6 +1673,7 @@ function renderRoutes(difficulty = '') {
           <div class="route-creator">por ${r.creatorName}</div>
         </div>
         <div class="difficulty-badge ${diffClass[r.difficulty]||'diff-easy'}">${r.difficulty}</div>
+        ${r.creatorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteRoute('${r.id}',event)"><i class="fa-solid fa-trash"></i></button>` : ''}
       </div>
       <div class="route-stats">
         <div class="route-stat"><i class="fa-solid fa-road"></i> ${r.distanceKm || 0} km</div>
@@ -1730,9 +1742,12 @@ async function loadEvents() {
           </div>
           <div class="event-footer">
             <div class="participants-text">${e.description?.substring(0,60) || ''}</div>
-            <button class="btn-join ${joined ? 'btn-joined' : ''}" onclick="handleJoin('${e.id}',${joined})">
-              ${joined ? '✓ Inscrito' : 'Participar'}
-            </button>
+            <div style="display:flex;gap:8px;align-items:center;">
+              ${e.creatorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteEvent('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+              <button class="btn-join ${joined ? 'btn-joined' : ''}" onclick="handleJoin('${e.id}',${joined})">
+                ${joined ? '✓ Inscrito' : 'Participar'}
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -1870,9 +1885,12 @@ async function loadMarketplace() {
         </div>
         <div class="listing-seller">
           <div class="seller-name">Vendedor: <span>${item.sellerName}</span></div>
-          <button class="contact-btn" onclick="contactSeller('${item.sellerPhone}','${item.title}')">
-            <i class="fa-brands fa-whatsapp"></i> Contato
-          </button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            ${item.sellerUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteListing('${item.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+            <button class="contact-btn" onclick="contactSeller('${item.sellerPhone}','${item.title}')">
+              <i class="fa-brands fa-whatsapp"></i> Contato
+            </button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -2159,6 +2177,44 @@ window.openWhatsAppSupport = function() {
   window.open('https://wa.me/5527992734399?text=' + msg, '_blank');
 }
 
+
+// ===== DELETE FUNCTIONS =====
+window.deletePost = async function(postId) {
+  if (!confirm('Excluir esta publicação?')) return;
+  try {
+    await deleteItem('posts', postId);
+    showToast('✅ Publicação excluída!');
+    loadFeed();
+  } catch(e) { showToast('Erro ao excluir'); }
+}
+
+window.deleteRoute = async function(routeId, event) {
+  event?.stopPropagation();
+  if (!confirm('Excluir esta rota?')) return;
+  try {
+    await deleteItem('routes', routeId);
+    showToast('✅ Rota excluída!');
+    loadRoutes();
+  } catch(e) { showToast('Erro ao excluir'); }
+}
+
+window.deleteEvent = async function(eventId) {
+  if (!confirm('Excluir este evento?')) return;
+  try {
+    await deleteItem('events', eventId);
+    showToast('✅ Evento excluído!');
+    loadEvents();
+  } catch(e) { showToast('Erro ao excluir'); }
+}
+
+window.deleteListing = async function(listingId) {
+  if (!confirm('Excluir este anúncio?')) return;
+  try {
+    await deleteItem('marketplace', listingId);
+    showToast('✅ Anúncio excluído!');
+    loadMarketplace();
+  } catch(e) { showToast('Erro ao excluir'); }
+}
 </script>
 </body>
 </html>
