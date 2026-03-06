@@ -22,3 +22,6 @@ GoogleService-Info.plist
 *.log
 *.tmp
 build/
+
+# android
+android/
