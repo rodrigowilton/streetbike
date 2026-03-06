@@ -553,12 +553,6 @@
       display: flex; align-items: center; gap: 6px;
     }
 
-    .btn-edit { background:transparent;color:#888;border:none;padding:4px 8px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s; }
-    .btn-edit:hover { color:var(--orange);background:var(--orange-glow); }
-    .online-dot { width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px; }
-    .offline-dot { width:8px;height:8px;border-radius:50%;background:#444;display:inline-block;margin-right:4px; }
-    .user-list-item { display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border); }
-    .user-list-avatar { width:36px;height:36px;border-radius:10px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0; }
     /* ===== SCROLLABLE CONTENT ===== */
     .scroll-content { flex: 1; overflow-y: auto; }
     .scroll-content::-webkit-scrollbar { display: none; }
@@ -952,22 +946,6 @@
             </div>
             <i class="fa-solid fa-chevron-right menu-arrow"></i>
           </div>
-          <div class="menu-item" onclick="openModal('onlineUsersModal')">
-            <div class="menu-icon"><i class="fa-solid fa-users"></i></div>
-            <div class="menu-text">
-              <div class="menu-title">Ciclistas Online</div>
-              <div class="menu-sub">Ver quem está ativo agora</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-          </div>
-          <div class="menu-item" onclick="openModal('lgpdModal')">
-            <div class="menu-icon"><i class="fa-solid fa-shield-halved"></i></div>
-            <div class="menu-text">
-              <div class="menu-title">Privacidade & LGPD</div>
-              <div class="menu-sub">Seus dados e exclusão de conta</div>
-            </div>
-            <i class="fa-solid fa-chevron-right menu-arrow"></i>
-          </div>
           <div class="menu-item logout-item" onclick="doLogout()">
             <div class="menu-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
             <div class="menu-text">
@@ -1045,7 +1023,7 @@
         <i class="fa-solid fa-key"></i>
         <div>
           <div class="pix-sub">Chave PIX</div>
-          <div class="pix-key"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cbb9a4afb9a2aca4bca2a7bfa4a5aaa7a6aea2afaa8baca6aaa2a7e5a8a4a6">[email&#160;protected]</a></div>
+          <div class="pix-key">rodrigowiltonalmeida@gmail.com</div>
         </div>
       </div>
       <div class="pix-row">
@@ -1377,115 +1355,6 @@
     </div>
   </div>
 
-  <!-- Edit Post Modal -->
-  <div id="editPostModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">✏️ Editar <span>Publicação</span></div>
-      <input type="hidden" id="editPostId"/>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <select id="editPostCategory" class="form-select"><option>Geral</option><option>Dica</option><option>Manutenção</option><option>Rota</option><option>Evento</option></select>
-        <textarea id="editPostContent" class="form-input" rows="4" style="resize:none;" placeholder="Conteúdo..."></textarea>
-        <button class="btn-primary" onclick="submitEditPost()">SALVAR</button>
-        <button class="btn-outline" onclick="closeModal('editPostModal')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Route Modal -->
-  <div id="editRouteModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">✏️ Editar <span>Rota</span></div>
-      <input type="hidden" id="editRouteId"/>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <input type="text" id="editRouteTitle" class="form-input" placeholder="Título"/>
-        <textarea id="editRouteDesc" class="form-input" rows="3" style="resize:none;" placeholder="Descrição"></textarea>
-        <div class="form-row">
-          <select id="editRouteDiff" class="form-select"><option>Fácil</option><option>Moderado</option><option>Difícil</option><option>Extremo</option></select>
-          <select id="editRouteTerrain" class="form-select"><option>Asfalto</option><option>Terra</option><option>Misto</option></select>
-        </div>
-        <div class="form-row">
-          <input type="number" id="editRouteKm" class="form-input" placeholder="Distância km"/>
-          <input type="number" id="editRouteTime" class="form-input" placeholder="Tempo min"/>
-        </div>
-        <input type="text" id="editRouteCity" class="form-input" placeholder="Cidade"/>
-        <button class="btn-primary" onclick="submitEditRoute()">SALVAR</button>
-        <button class="btn-outline" onclick="closeModal('editRouteModal')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Event Modal -->
-  <div id="editEventModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">✏️ Editar <span>Evento</span></div>
-      <input type="hidden" id="editEventId"/>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <input type="text" id="editEventTitle" class="form-input" placeholder="Título"/>
-        <textarea id="editEventDesc" class="form-input" rows="3" style="resize:none;" placeholder="Descrição"></textarea>
-        <input type="datetime-local" id="editEventDate" class="form-input"/>
-        <div class="form-row">
-          <select id="editEventCategory" class="form-select"><option>Passeio</option><option>Competição</option><option>Treino</option><option>Social</option></select>
-          <input type="text" id="editEventLocation" class="form-input" placeholder="Local"/>
-        </div>
-        <button class="btn-primary" onclick="submitEditEvent()">SALVAR</button>
-        <button class="btn-outline" onclick="closeModal('editEventModal')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Listing Modal -->
-  <div id="editListingModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">✏️ Editar <span>Anúncio</span></div>
-      <input type="hidden" id="editListingId"/>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <input type="text" id="editListingTitle" class="form-input" placeholder="Título"/>
-        <textarea id="editListingDesc" class="form-input" rows="3" style="resize:none;" placeholder="Descrição"></textarea>
-        <div class="form-row">
-          <input type="number" id="editListingPrice" class="form-input" placeholder="Preço R$"/>
-          <select id="editListingCondition" class="form-select"><option>Novo</option><option>Seminovo</option><option>Usado</option></select>
-        </div>
-        <button class="btn-primary" onclick="submitEditListing()">SALVAR</button>
-        <button class="btn-outline" onclick="closeModal('editListingModal')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- LGPD Modal -->
-  <div id="lgpdModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">🔒 Privacidade & <span>LGPD</span></div>
-      <div style="overflow-y:auto;max-height:45vh;margin-bottom:16px;font-size:14px;color:#ccc;line-height:1.7;">
-        <strong style="color:var(--orange);">Política de Privacidade — StreetBike</strong><br><br>
-        Coletamos apenas dados necessários: nome, e-mail, cidade, modelo da bike e estilo de pedalada.<br><br>
-        <strong>Seus dados são usados para:</strong><br>
-        • Personalizar sua experiência no app<br>
-        • Exibir seu perfil para outros ciclistas<br>
-        • Enviar notificações sobre eventos e renovação<br><br>
-        <strong>Seus direitos (LGPD — Lei 13.709/2018):</strong><br>
-        • Acessar, corrigir ou excluir seus dados<br>
-        • Revogar consentimento a qualquer momento<br><br>
-        Armazenamento: Google Firebase. Dúvidas: <span style="color:var(--orange);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="592b363d2b303e362e30352d36373835343c303d38193e34383035773a3634">[email&#160;protected]</a></span>
-      </div>
-      <div style="background:#2a0f0f;border:1px solid var(--red);border-radius:12px;padding:14px;margin-bottom:12px;">
-        <p style="font-size:13px;color:#ff9999;margin-bottom:10px;">⚠️ Excluir conta remove permanentemente todos seus dados. Ação irreversível.</p>
-        <button class="btn-outline" style="color:var(--red);border-color:var(--red);width:100%;" onclick="deleteMyAccount()">🗑️ Excluir minha conta</button>
-      </div>
-      <button class="btn-outline" onclick="closeModal('lgpdModal')">Fechar</button>
-    </div>
-  </div>
-
-  <!-- Online Users Modal -->
-  <div id="onlineUsersModal" class="modal-overlay">
-    <div class="modal"><div class="modal-handle"></div>
-      <div class="modal-title">👥 Ciclistas <span>Online</span></div>
-      <div id="onlineUsersList" style="max-height:60vh;overflow-y:auto;">
-        <div class="loading"><div class="loading-spinner"></div></div>
-      </div>
-      <button class="btn-outline" style="margin-top:12px;" onclick="closeModal('onlineUsersModal')">Fechar</button>
-    </div>
-  </div>
-
   <!-- Route Detail Modal -->
   <div id="routeDetailModal" class="modal-overlay">
     <div class="modal" style="position:relative;">
@@ -1508,7 +1377,7 @@
   <div id="toast" class="toast"></div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
 import {
   auth, db,
   registerUser, loginUser, logoutUser, resetPassword, getCurrentUser,
@@ -1522,7 +1391,7 @@ import {
   sendNotificationToUser, sendBroadcast, getAdminStats,
   getChatRooms, createGroup, joinRoom, leaveRoom,
   getChatMessages, sendChatMessage, ensureGlobalChat,
-  deleteItem, updateItem
+  deleteItem
 } from './services/firebase.js';
 
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
@@ -1585,22 +1454,23 @@ function daysLeft(ts) {
 
 // ===== AUTH INIT =====
 onAuthStateChanged(auth, async (firebaseUser) => {
-  if (!firebaseUser) { showScreen('login'); return; }
+  if (!firebaseUser) {
+    showScreen('login');
+    return;
+  }
   try {
     currentUser = await getCurrentUser();
     if (!currentUser) { showScreen('login'); return; }
-    if (!currentUser.isAdmin && !currentUser.isActive) {
-      await logoutUser();
-      showScreen('login');
-      const b = document.getElementById('loginBanner');
-      b.textContent = '🚫 Conta bloqueada. WhatsApp: (27) 99273-4399';
-      b.style.display = 'block';
-      return;
+    if (currentUser.isAdmin) {
+      showScreen('admin');
+      loadAdminData();
+    } else {
+      showScreen('main');
+      initMainApp();
     }
-    if (!currentUser.isAdmin && currentUser.isExpired) { showScreen('expired'); return; }
-    if (currentUser.isAdmin) { showScreen('admin'); loadAdminData(); }
-    else { showScreen('main'); initMainApp(); }
-  } catch(e) { showScreen('login'); }
+  } catch(e) {
+    showScreen('login');
+  }
 });
 
 // ===== SPLASH =====
@@ -1700,13 +1570,6 @@ window.doLogout = async function() {
 
 // ===== MAIN APP =====
 function initMainApp() {
-  // Update lastSeen for online users tracking
-  if (currentUser?.uid) {
-    import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js').then(({doc, updateDoc, serverTimestamp, getFirestore}) => {
-      const db2 = getFirestore();
-      updateDoc(doc(db2, 'users', currentUser.uid), { lastSeen: serverTimestamp() }).catch(()=>{});
-    });
-  }
   loadProfile();
   loadFeed();
   loadHomeEvents();
@@ -1778,7 +1641,6 @@ async function loadFeed() {
   list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
   try {
     const posts = await getPosts(20);
-    window._loadedPosts = posts;
     if (!posts.length) {
       list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-newspaper"></i><h3>Sem publicações</h3><p>Seja o primeiro a postar!</p></div>`;
       return;
@@ -1804,7 +1666,7 @@ async function loadFeed() {
           <button class="action-btn" onclick="sharePost('${p.content}')">
             <i class="fa-solid fa-share-nodes"></i>
           </button>
-          ${p.authorUid === currentUser?.uid ? `<button class="btn-edit" onclick="openEditPost('${p.id}')"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="deletePost('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+          ${p.authorUid === currentUser?.uid ? `<button class="btn-delete" onclick="deletePost('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
         </div>
       </div>
     `).join('');
@@ -1870,7 +1732,7 @@ function renderRoutes(difficulty = '') {
           <div class="route-creator">por ${r.creatorName}</div>
         </div>
         <div class="difficulty-badge ${dc}">${r.difficulty||''}</div>
-        ${isMine ? `<button class="btn-edit" onclick="openEditRoute('${r.id}',event)"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="confirmDeleteRoute(event,'${r.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+        ${isMine ? `<button class="btn-delete" onclick="confirmDeleteRoute(event,'${r.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
       </div>
       <div class="route-stats">
         <div class="route-stat"><i class="fa-solid fa-road"></i> ${r.distanceKm||0} km</div>
@@ -1943,7 +1805,7 @@ async function loadEvents() {
           <div class="event-footer">
             <button class="btn-outline" style="padding:8px 12px;font-size:13px;" onclick="viewEvent('${ev.id}')">Ver mais</button>
             <div style="display:flex;gap:8px;align-items:center;">
-              ${isMine ? `<button class="btn-edit" onclick="openEditEvent('${ev.id}')"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="confirmDeleteEvent('${ev.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+              ${isMine ? `<button class="btn-delete" onclick="confirmDeleteEvent('${ev.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
               <button class="btn-join ${joined?'btn-joined':''}" onclick="handleJoin('${ev.id}',${joined})">
                 ${joined?'✓ Inscrito':'Participar'}
               </button>
@@ -2067,7 +1929,6 @@ async function loadMarketplace() {
   list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
   try {
     const items = await getMarketplace();
-    window._loadedListings = items;
     if (!items.length) {
       list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-tag"></i><h3>Sem anúncios</h3><p>Seja o primeiro a anunciar!</p></div>';
       return;
@@ -2087,7 +1948,7 @@ async function loadMarketplace() {
         <div class="listing-seller">
           <div class="seller-name">Vendedor: <span>${item.sellerName}</span></div>
           <div style="display:flex;gap:8px;align-items:center;">
-            ${item.sellerUid === currentUser?.uid ? `<button class="btn-edit" onclick="openEditListing('${item.id}')"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="deleteListing('${item.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${item.sellerUid === currentUser?.uid ? `<button class="btn-delete" onclick="deleteListing('${item.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
             <button class="contact-btn" onclick="contactSeller('${item.sellerPhone}','${item.title}')">
               <i class="fa-brands fa-whatsapp"></i> Contato
             </button>
@@ -2515,183 +2376,34 @@ window.viewRoute = function(routeId) {
 }
 
 window.viewEvent = function(eventId) {
+  const events = document.querySelectorAll('.event-card');
+  // Find from loaded data - use global store
   const ev = window._loadedEvents?.find(x => x.id === eventId);
   if (!ev) { showToast('Carregando...'); return; }
   const date = ev.eventDate?.toDate?.() || new Date();
   const dateStr = date.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
   const joined = ev.participants?.includes(currentUser?.uid);
   const isMine = ev.creatorUid === currentUser?.uid;
-  let html = '<div style="background:var(--orange);margin:-20px -20px 16px;padding:16px 20px;border-radius:12px 12px 0 0;">';
-  html += '<div style="font-family:var(--font-display);font-size:13px;font-weight:700;">' + (ev.category||'Evento') + '</div>';
-  html += '<div style="font-family:var(--font-display);font-size:24px;font-weight:800;">' + ev.title + '</div>';
-  html += '<div style="font-size:13px;opacity:.9;">' + dateStr + '</div></div>';
-  if (ev.description) html += '<p style="font-size:15px;color:#DDD;line-height:1.6;margin-bottom:16px;">' + ev.description + '</p>';
-  html += '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">';
-  if (ev.location) html += '<div style="display:flex;gap:8px;align-items:center;font-size:14px;"><i class="fa-solid fa-location-dot" style="color:var(--orange);"></i> ' + ev.location + '</div>';
-  html += '<div style="display:flex;gap:8px;align-items:center;font-size:14px;"><i class="fa-solid fa-user-group" style="color:var(--orange);"></i> ' + (ev.participants?.length||0) + ' participantes' + (ev.maxParticipants ? ' de ' + ev.maxParticipants + ' vagas' : '') + '</div>';
-  html += '<div style="display:flex;gap:8px;align-items:center;font-size:14px;"><i class="fa-solid fa-tag" style="color:var(--orange);"></i> ' + (ev.price>0 ? 'R$ '+ev.price : 'Gratuito') + '</div>';
-  html += '<div style="display:flex;gap:8px;align-items:center;font-size:14px;"><i class="fa-solid fa-user" style="color:var(--orange);"></i> Organizado por ' + (ev.creatorName||'') + '</div>';
-  html += '</div>';
-  var eid = ev.id;
-  if (joined) html += '<button class="btn-primary" style="background:var(--green);width:100%;margin-bottom:8px;" onclick="handleJoin(\'' + eid + '\',true);closeModal(\'eventDetailModal\')">✓ Você está inscrito</button>';
-  else html += '<button class="btn-primary" style="width:100%;margin-bottom:8px;" onclick="handleJoin(\'' + eid + '\',false);closeModal(\'eventDetailModal\')">Participar do evento</button>';
-  if (isMine) {
-    html += '<button class="btn-edit" style="width:100%;margin-bottom:8px;border:1px solid var(--orange);border-radius:12px;padding:12px;" onclick="openEditEvent(\'' + eid + '\')">✏️ Editar evento</button>';
-    html += '<button class="btn-outline" style="color:var(--red);border-color:var(--red);width:100%;" onclick="confirmDeleteEvent(\'' + eid + '\')">🗑️ Excluir evento</button>';
-  }
-  document.getElementById('eventDetailContent').innerHTML = html;
+  document.getElementById('eventDetailContent').innerHTML = `
+    <div style="background:var(--orange);margin:-20px -20px 16px;padding:16px 20px;border-radius:12px 12px 0 0;">
+      <div style="font-family:var(--font-display);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">${ev.category||'Evento'}</div>
+      <div style="font-family:var(--font-display);font-size:24px;font-weight:800;">${ev.title}</div>
+      <div style="font-size:13px;opacity:.9;">${dateStr}</div>
+    </div>
+    ${ev.description ? `<p style="font-size:15px;color:#DDD;line-height:1.6;margin-bottom:16px;">${ev.description}</p>` : ''}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      ${ev.location ? `<div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-location-dot" style="color:var(--orange);width:16px;"></i><span>${ev.location}</span></div>` : ''}
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-user-group" style="color:var(--orange);width:16px;"></i><span>${ev.participants?.length||0} participantes${ev.maxParticipants?` de ${ev.maxParticipants} vagas`:''}</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-tag" style="color:var(--orange);width:16px;"></i><span>${ev.price>0?`R$ ${ev.price}`:'Gratuito'}</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:14px;"><i class="fa-solid fa-user" style="color:var(--orange);width:16px;"></i><span>Organizado por ${ev.creatorName}</span></div>
+    </div>
+    <button class="btn-primary ${joined?'':'btn-join'}" style="${joined?'background:var(--green);':''}" onclick="handleJoin('${ev.id}',${joined});closeModal('eventDetailModal')">
+      ${joined?'✓ Você está inscrito':'Participar do evento'}
+    </button>
+    ${isMine ? `<button class="btn-outline" style="color:var(--red);border-color:var(--red);width:100%;margin-top:8px;" onclick="confirmDeleteEvent('${ev.id}')">🗑️ Excluir evento</button>` : ''}
+  `;
   openModal('eventDetailModal');
 }
-
-// ===== EDIT POST =====
-window.openEditPost = function(postId) {
-  document.getElementById('editPostId').value = postId;
-  const p = window._loadedPosts?.find(x => x.id === postId);
-  if (p) {
-    document.getElementById('editPostContent').value = p.content;
-    document.getElementById('editPostCategory').value = p.category || 'Geral';
-  }
-  openModal('editPostModal');
-}
-window.submitEditPost = async function() {
-  const id = document.getElementById('editPostId').value;
-  const content = document.getElementById('editPostContent').value.trim();
-  if (!content) { showToast('Escreva algo'); return; }
-  try {
-    await updateItem('posts', id, { content, category: document.getElementById('editPostCategory').value });
-    closeModal('editPostModal');
-    showToast('✅ Publicação atualizada!');
-    loadFeed();
-  } catch(e) { showToast('Erro ao salvar'); }
-}
-
-// ===== EDIT ROUTE =====
-window.openEditRoute = function(routeId, ev) {
-  ev?.stopPropagation();
-  const r = allRoutes.find(x => x.id === routeId);
-  if (!r) return;
-  document.getElementById('editRouteId').value = routeId;
-  document.getElementById('editRouteTitle').value = r.title || '';
-  document.getElementById('editRouteDesc').value = r.description || '';
-  document.getElementById('editRouteDiff').value = r.difficulty || 'Fácil';
-  document.getElementById('editRouteTerrain').value = r.terrainType || 'Asfalto';
-  document.getElementById('editRouteKm').value = r.distanceKm || '';
-  document.getElementById('editRouteTime').value = r.estimatedTimeMin || '';
-  document.getElementById('editRouteCity').value = r.city || '';
-  openModal('editRouteModal');
-}
-window.submitEditRoute = async function() {
-  const id = document.getElementById('editRouteId').value;
-  try {
-    await updateItem('routes', id, {
-      title: document.getElementById('editRouteTitle').value.trim(),
-      description: document.getElementById('editRouteDesc').value.trim(),
-      difficulty: document.getElementById('editRouteDiff').value,
-      terrainType: document.getElementById('editRouteTerrain').value,
-      distanceKm: parseFloat(document.getElementById('editRouteKm').value) || 0,
-      estimatedTimeMin: parseInt(document.getElementById('editRouteTime').value) || 0,
-      city: document.getElementById('editRouteCity').value.trim()
-    });
-    closeModal('editRouteModal');
-    showToast('✅ Rota atualizada!');
-    loadRoutes();
-  } catch(e) { showToast('Erro ao salvar'); }
-}
-
-// ===== EDIT EVENT =====
-window.openEditEvent = function(eventId) {
-  const ev = window._loadedEvents?.find(x => x.id === eventId);
-  if (!ev) return;
-  document.getElementById('editEventId').value = eventId;
-  document.getElementById('editEventTitle').value = ev.title || '';
-  document.getElementById('editEventDesc').value = ev.description || '';
-  document.getElementById('editEventCategory').value = ev.category || 'Passeio';
-  document.getElementById('editEventLocation').value = ev.location || '';
-  if (ev.eventDate?.toDate) {
-    const d = ev.eventDate.toDate();
-    document.getElementById('editEventDate').value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  }
-  openModal('editEventModal');
-}
-window.submitEditEvent = async function() {
-  const id = document.getElementById('editEventId').value;
-  const dateStr = document.getElementById('editEventDate').value;
-  try {
-    await updateItem('events', id, {
-      title: document.getElementById('editEventTitle').value.trim(),
-      description: document.getElementById('editEventDesc').value.trim(),
-      category: document.getElementById('editEventCategory').value,
-      location: document.getElementById('editEventLocation').value.trim(),
-      eventDate: dateStr ? Timestamp.fromDate(new Date(dateStr)) : null
-    });
-    closeModal('editEventModal');
-    showToast('✅ Evento atualizado!');
-    loadEvents();
-  } catch(e) { showToast('Erro ao salvar'); }
-}
-
-// ===== EDIT LISTING =====
-window.openEditListing = function(listingId) {
-  const item = window._loadedListings?.find(x => x.id === listingId);
-  if (!item) return;
-  document.getElementById('editListingId').value = listingId;
-  document.getElementById('editListingTitle').value = item.title || '';
-  document.getElementById('editListingDesc').value = item.description || '';
-  document.getElementById('editListingPrice').value = item.price || '';
-  document.getElementById('editListingCondition').value = item.condition || 'Novo';
-  openModal('editListingModal');
-}
-window.submitEditListing = async function() {
-  const id = document.getElementById('editListingId').value;
-  try {
-    await updateItem('marketplace', id, {
-      title: document.getElementById('editListingTitle').value.trim(),
-      description: document.getElementById('editListingDesc').value.trim(),
-      price: parseFloat(document.getElementById('editListingPrice').value) || 0,
-      condition: document.getElementById('editListingCondition').value
-    });
-    closeModal('editListingModal');
-    showToast('✅ Anúncio atualizado!');
-    loadMarketplace();
-  } catch(e) { showToast('Erro ao salvar'); }
-}
-
-// ===== DELETE ACCOUNT =====
-window.deleteMyAccount = async function() {
-  if (!confirm('Tem certeza? Todos seus dados serão excluídos permanentemente.')) return;
-  if (!confirm('Confirme: excluir conta definitivamente?')) return;
-  try {
-    await deleteItem('users', currentUser.uid);
-    await logoutUser();
-    showScreen('login');
-    showToast('Conta excluída.');
-  } catch(e) { showToast('Erro ao excluir conta.'); }
-}
-
-// ===== ONLINE USERS =====
-const _origOpenModal = window.openModal;
-window.openModal = function(id) {
-  _origOpenModal(id);
-  if (id !== 'onlineUsersModal') return;
-  const list = document.getElementById('onlineUsersList');
-  list.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
-  getAllUsers().then(users => {
-    const now = Date.now();
-    const online = users.filter(u => u.lastSeen && (now - (u.lastSeen.toMillis?.() || 0) < 5*60*1000));
-    const offline = users.filter(u => !online.find(o => o.uid === u.uid));
-    let html = '';
-    if (online.length) {
-      html += '<div style="font-size:12px;font-weight:700;color:var(--green);padding:8px 0 4px;letter-spacing:1px;">● ONLINE (' + online.length + ')</div>';
-      html += online.map(u => '<div class="user-list-item"><div class="user-list-avatar">' + (u.name||'?')[0].toUpperCase() + '</div><div><div style="font-weight:600;font-size:14px;">' + (u.name||'') + '</div><div style="font-size:12px;color:var(--gray);">' + (u.city||'') + '</div></div><span class="online-dot"></span></div>').join('');
-    }
-    if (offline.length) {
-      html += '<div style="font-size:12px;font-weight:700;color:var(--gray);padding:12px 0 4px;letter-spacing:1px;">○ OFFLINE (' + offline.length + ')</div>';
-      html += offline.slice(0,30).map(u => '<div class="user-list-item"><div class="user-list-avatar" style="background:var(--card2);">' + (u.name||'?')[0].toUpperCase() + '</div><div><div style="font-weight:600;font-size:14px;">' + (u.name||'') + '</div><div style="font-size:12px;color:var(--gray);">' + (u.city||'') + '</div></div><span class="offline-dot"></span></div>').join('');
-    }
-    list.innerHTML = html || '<div class="empty-state">Nenhum usuário</div>';
-  }).catch(() => { list.innerHTML = '<div class="empty-state">Erro ao carregar</div>'; });
-}
-
 </script>
 </body>
 </html>

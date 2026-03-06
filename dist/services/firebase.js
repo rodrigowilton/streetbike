@@ -352,7 +352,3 @@ export async function ensureGlobalChat() {
 export async function deleteItem(collection_name, id) {
   await deleteDoc(doc(db, collection_name, id));
 }
-
-export async function updateItem(collection_name, id, data) {
-  await updateDoc(doc(db, collection_name, id), data);
-}

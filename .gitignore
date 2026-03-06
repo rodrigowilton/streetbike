@@ -1,6 +1,5 @@
-# Node.js - OBRIGATÓRIO
+# Node.js
 node_modules/
-package-lock.json
 
 # Sistema Operacional
 .DS_Store
@@ -13,21 +12,13 @@ desktop.ini
 *.swp
 *.swo
 
-# Capacitor/Cordova (pastas nativas - descomente se NÃO for versionar o app nativo)
-# android/
-# ios/
-www/
-
 # Arquivos sensíveis
 .env
 .env.local
-*.config.json
-capacitor.config.json
 google-services.json
 GoogleService-Info.plist
 
-# Logs e builds
+# Logs
 *.log
 *.tmp
-dist/
 build/
